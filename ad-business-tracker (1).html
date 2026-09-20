@@ -1,0 +1,2686 @@
+<title>Ad Business Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#080808;
+  --bg2:#111111;
+  --card:#171717;
+  --card2:#1c1c1c;
+  --border:#292929;
+  --border-soft:#202020;
+  --yellow:#FFD400;
+  --gold:#F5B800;
+  --text:#FFFFFF;
+  --text2:#A7A7A7;
+  --text3:#6f6f6f;
+  --success:#0ca30c;
+  --success-bg:rgba(12,163,12,.14);
+  --warning:#fab219;
+  --warning-bg:rgba(250,178,25,.14);
+  --danger:#e0455c;
+  --danger-bg:rgba(224,69,92,.14);
+  --serious:#ec835a;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500;
+  --c5:#d55181; --c6:#3fae3f; --c7:#9085e9; --c8:#e66767;
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 10px 30px rgba(0,0,0,.35);
+  --sidebar-w:248px;
+  --sidebar-w-collapsed:76px;
+  font-family:'Manrope',system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Manrope',system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+.num{font-family:'IBM Plex Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; letter-spacing:-0.01em;}
+h1,h2,h3,h4{margin:0; font-weight:800; letter-spacing:-.01em; text-wrap:balance;}
+p{margin:0;}
+a{color:inherit;}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-thumb{background:#232323; border-radius:8px; border:2px solid var(--bg);}
+::-webkit-scrollbar-track{background:transparent;}
+.icon{width:18px; height:18px; flex:none;}
+.icon-sm{width:14px;height:14px;}
+.icon-lg{width:22px;height:22px;}
+
+/* ---------- Shell ---------- */
+#app-shell{display:flex; min-height:100%; background:var(--bg);}
+#sidebar{
+  width:var(--sidebar-w); flex:none; background:var(--bg2); border-right:1px solid var(--border-soft);
+  display:flex; flex-direction:column; height:100vh; position:sticky; top:0; transition:width .18s ease;
+  z-index:40;
+}
+#sidebar.collapsed{width:var(--sidebar-w-collapsed);}
+.brand{display:flex; align-items:center; gap:10px; padding:20px 18px; border-bottom:1px solid var(--border-soft); min-height:32px;}
+.brand-mark{width:32px; height:32px; border-radius:9px; background:linear-gradient(155deg,var(--yellow),var(--gold)); display:flex; align-items:center; justify-content:center; flex:none; font-weight:800; color:#0a0a0a; font-size:15px;}
+.brand-text{display:flex; flex-direction:column; overflow:hidden; white-space:nowrap;}
+.brand-text b{font-size:13.5px; letter-spacing:.02em; font-weight:800;}
+.brand-text span{font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.09em; font-weight:700;}
+#sidebar.collapsed .brand-text{display:none;}
+.sidebar-collapse-btn{margin-left:auto; background:none; border:none; color:var(--text3); cursor:pointer; padding:4px; border-radius:6px; display:flex;}
+.sidebar-collapse-btn:hover{background:#1e1e1e; color:var(--text);}
+#sidebar.collapsed .sidebar-collapse-btn{display:none;}
+nav.navlist{flex:1; overflow-y:auto; padding:10px 10px 10px;}
+.nav-item{
+  display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:10px; color:var(--text2);
+  cursor:pointer; font-size:13.5px; font-weight:600; margin-bottom:2px; white-space:nowrap; overflow:hidden;
+  border:1px solid transparent; position:relative;
+}
+.nav-item .icon{color:var(--text3);}
+.nav-item:hover{background:#1a1a1a; color:var(--text);}
+.nav-item:hover .icon{color:var(--text2);}
+.nav-item.active{background:rgba(255,212,0,.09); color:var(--yellow); border-color:rgba(255,212,0,.18);}
+.nav-item.active .icon{color:var(--yellow);}
+.nav-badge{margin-left:auto; background:var(--danger); color:#fff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:20px;}
+#sidebar.collapsed .nav-item span.label{display:none;}
+#sidebar.collapsed .nav-badge{position:absolute; top:2px; right:2px; margin:0; width:8px; height:8px; padding:0; border-radius:50%; font-size:0;}
+#sidebar.collapsed .nav-item{justify-content:center;}
+.sidebar-foot{padding:12px; border-top:1px solid var(--border-soft); font-size:11px; color:var(--text3); white-space:nowrap; overflow:hidden;}
+#sidebar.collapsed .sidebar-foot{display:none;}
+
+#main{flex:1; min-width:0; display:flex; flex-direction:column; min-height:100vh;}
+#topbar{
+  position:sticky; top:0; z-index:30; background:rgba(8,8,8,.86); backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border-soft); padding:16px 26px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.hamburger{display:none; background:none; border:1px solid var(--border); color:var(--text2); border-radius:9px; padding:8px; cursor:pointer;}
+.greeting{display:flex; flex-direction:column; margin-right:auto;}
+.greeting h1{font-size:19px;}
+.greeting p{color:var(--text2); font-size:12.5px; margin-top:2px;}
+.topbar-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+
+.btn{
+  display:inline-flex; align-items:center; gap:7px; border-radius:10px; border:1px solid var(--border); background:var(--card);
+  color:var(--text); font-size:12.8px; font-weight:700; padding:9px 14px; cursor:pointer; transition:.12s;
+  white-space:nowrap;
+}
+.btn:hover{border-color:#3a3a3a; background:#1d1d1d;}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--yellow); border-color:var(--yellow); color:#0a0900;}
+.btn-primary:hover{background:var(--gold); border-color:var(--gold);}
+.btn-ghost{background:transparent; border-color:transparent;}
+.btn-ghost:hover{background:#1a1a1a;}
+.btn-danger{color:var(--danger); border-color:rgba(224,69,92,.35);}
+.btn-danger:hover{background:var(--danger-bg);}
+.btn-sm{padding:6px 10px; font-size:12px; border-radius:8px;}
+.btn-icon{padding:8px; border-radius:9px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+
+.select, .input, .textarea{
+  background:#101010; border:1px solid var(--border); color:var(--text); border-radius:9px; padding:9px 11px; font-size:12.8px;
+  font-family:inherit; width:100%; outline:none;
+}
+.select:focus, .input:focus, .textarea:focus{border-color:var(--yellow);}
+.textarea{resize:vertical; min-height:64px;}
+select.select{appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A7A7A7' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>"); background-repeat:no-repeat; background-position:right 10px center; padding-right:30px;}
+label.field-label{font-size:11.5px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:6px;}
+.field{margin-bottom:14px;}
+.field-hint{font-size:11px; color:var(--text3); margin-top:5px;}
+.check-row{display:flex; align-items:center; gap:8px; font-size:12.8px; color:var(--text);}
+.check-row input{width:16px;height:16px; accent-color:var(--yellow);}
+
+#content{padding:24px 26px 90px; flex:1;}
+.page-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;}
+.page-head h2{font-size:20px;}
+.page-head .sub{color:var(--text2); font-size:12.8px; margin-top:4px;}
+.toolbar{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+
+.grid{display:grid; gap:14px;}
+.kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+@media (max-width:1180px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .grid-3{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width:640px){.kpi-grid, .grid-2, .grid-3{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
+}
+.card.pad-lg{padding:22px;}
+.card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px;}
+.card-head h3{font-size:14px;}
+.card-head .sub{font-size:11.5px; color:var(--text3); font-weight:600;}
+
+.kpi{position:relative; overflow:hidden;}
+.kpi .k-label{font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.06em; display:flex; align-items:center; gap:6px;}
+.kpi .k-value{font-size:26px; font-weight:800; margin-top:10px; letter-spacing:-.02em;}
+.kpi .k-delta{margin-top:8px; font-size:12px; font-weight:700; display:flex; align-items:center; gap:4px;}
+.k-delta.up{color:var(--success);} .k-delta.down{color:var(--danger);} .k-delta.flat{color:var(--text3);}
+.kpi .k-tip{color:var(--text3); cursor:help;}
+
+.badge{display:inline-flex; align-items:center; gap:5px; font-size:10.8px; font-weight:800; padding:3px 9px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em; white-space:nowrap;}
+.badge-success{color:var(--success); background:var(--success-bg);}
+.badge-warning{color:var(--warning); background:var(--warning-bg);}
+.badge-danger{color:var(--danger); background:var(--danger-bg);}
+.badge-neutral{color:var(--text2); background:#232323;}
+.badge-info{color:var(--c1); background:rgba(57,135,229,.14);}
+.dot{width:7px; height:7px; border-radius:50%; background:currentColor; flex:none;}
+
+.table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius);}
+table.tbl{width:100%; border-collapse:collapse; font-size:12.6px; min-width:640px;}
+table.tbl thead th{
+  text-align:left; font-size:10.6px; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); font-weight:800;
+  padding:11px 14px; background:var(--bg2); border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0;
+}
+table.tbl tbody td{padding:11px 14px; border-bottom:1px solid var(--border-soft); vertical-align:middle;}
+table.tbl tbody tr:last-child td{border-bottom:none;}
+table.tbl tbody tr:hover{background:#1b1b1b;}
+.row-actions{display:flex; gap:4px; justify-content:flex-end;}
+.cell-strong{font-weight:700;}
+.cell-muted{color:var(--text3);}
+.cell-num{font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;}
+
+.empty-state{display:flex; flex-direction:column; align-items:center; text-align:center; padding:56px 20px; color:var(--text2); gap:10px;}
+.empty-state .icon{width:34px; height:34px; color:var(--text3);}
+.empty-state h4{font-size:15px; color:var(--text);}
+.empty-state p{font-size:12.8px; max-width:340px;}
+
+.progress-track{height:9px; background:#232323; border-radius:20px; overflow:hidden;}
+.progress-fill{height:100%; border-radius:20px; background:linear-gradient(90deg,var(--gold),var(--yellow));}
+.progress-fill.danger{background:var(--danger);}
+.progress-fill.warning{background:var(--warning);}
+
+.tabs{display:flex; gap:4px; background:#101010; border:1px solid var(--border); border-radius:10px; padding:3px;}
+.tab-btn{padding:7px 13px; font-size:12px; font-weight:700; color:var(--text2); border-radius:8px; cursor:pointer; border:none; background:none;}
+.tab-btn.active{background:var(--card); color:var(--yellow);}
+
+.filter-bar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px;}
+.filter-bar .select, .filter-bar .input{width:auto; min-width:130px;}
+.search-input-wrap{position:relative; display:flex; align-items:center;}
+.search-input-wrap .icon{position:absolute; left:11px; color:var(--text3);}
+.search-input-wrap input{padding-left:34px; min-width:190px;}
+
+/* Modal */
+#modal-root{position:fixed; inset:0; z-index:100; display:none;}
+#modal-root.open{display:block;}
+.modal-overlay{position:absolute; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(2px);}
+.modal-panel{
+  position:relative; max-width:560px; width:92%; margin:6vh auto 0; background:var(--bg2); border:1px solid var(--border);
+  border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.55); max-height:88vh; display:flex; flex-direction:column;
+}
+.modal-panel.wide{max-width:760px;}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border-soft);}
+.modal-head h3{font-size:15.5px;}
+.modal-body{padding:20px 22px; overflow-y:auto; flex:1 1 auto; min-height:0;}
+.modal-foot{padding:16px 22px; border-top:1px solid var(--border-soft); display:flex; justify-content:flex-end; gap:8px;}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 14px;}
+.form-grid .span-2{grid-column:1/-1;}
+@media (max-width:560px){.form-grid{grid-template-columns:1fr;}}
+
+/* Toast */
+#toast-root{position:fixed; bottom:22px; right:22px; z-index:200; display:flex; flex-direction:column; gap:8px; align-items:flex-end;}
+.toast{background:var(--card); border:1px solid var(--border); border-radius:11px; padding:11px 16px; font-size:12.6px; font-weight:600; box-shadow:var(--shadow); display:flex; align-items:center; gap:9px; max-width:320px; animation:toastIn .18s ease;}
+.toast.success{border-color:rgba(12,163,12,.4);} .toast.success .icon{color:var(--success);}
+.toast.error{border-color:rgba(224,69,92,.4);} .toast.error .icon{color:var(--danger);}
+@keyframes toastIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+/* Quick add fab */
+#quick-add-fab{
+  position:fixed; bottom:22px; right:22px; z-index:60; background:var(--yellow); color:#0a0900; border:none; border-radius:50%;
+  width:52px; height:52px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; cursor:pointer;
+  box-shadow:0 10px 28px rgba(255,212,0,.3); transition:.15s;
+}
+#quick-add-fab:hover{background:var(--gold); transform:translateY(-1px) scale(1.04);}
+#quick-add-fab .icon{width:22px; height:22px;}
+#quick-add-menu{position:fixed; bottom:78px; right:22px; z-index:61; background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:8px; box-shadow:0 20px 50px rgba(0,0,0,.5); display:none; min-width:210px;}
+#quick-add-menu.open{display:block;}
+.qa-item{display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:9px; cursor:pointer; font-size:12.8px; font-weight:700;}
+.qa-item:hover{background:#1e1e1e;}
+.qa-item .icon{color:var(--yellow);}
+
+/* Search overlay */
+#search-overlay{position:fixed; inset:0; z-index:120; display:none;}
+#search-overlay.open{display:block;}
+.search-panel{max-width:560px; margin:8vh auto 0; background:var(--bg2); border:1px solid var(--border); border-radius:16px; width:92%; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.55);}
+.search-panel-input{display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border-soft);}
+.search-panel-input input{flex:1; background:none; border:none; outline:none; color:var(--text); font-size:14px; font-family:inherit;}
+.search-results{max-height:56vh; overflow-y:auto; padding:8px;}
+.search-result{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; cursor:pointer;}
+.search-result:hover{background:#1e1e1e;}
+.search-result .icon{color:var(--text3);}
+.search-result-meta{font-size:11px; color:var(--text3);}
+.search-group-label{font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:800; color:var(--text3); padding:10px 12px 4px;}
+
+/* Alerts list */
+.alert-row{display:flex; gap:12px; align-items:flex-start; padding:13px 14px; border-radius:12px; border:1px solid var(--border); background:var(--card2); cursor:pointer;}
+.alert-row:hover{border-color:#3a3a3a;}
+.alert-row + .alert-row{margin-top:8px;}
+.alert-icon{width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:none;}
+.alert-icon.URGENT{background:var(--danger-bg); color:var(--danger);}
+.alert-icon.WARNING{background:var(--warning-bg); color:var(--warning);}
+.alert-icon.INFO{background:rgba(57,135,229,.14); color:var(--c1);}
+.alert-icon.GOOD{background:var(--success-bg); color:var(--success);}
+.alert-title{font-weight:700; font-size:13px;}
+.alert-desc{font-size:12px; color:var(--text2); margin-top:2px;}
+.alert-dismiss{margin-left:auto; flex:none;}
+
+/* Chart bits */
+.chart-legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px;}
+.legend-item{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text2); font-weight:600;}
+.legend-swatch{width:10px; height:10px; border-radius:3px;}
+.chart-tooltip{position:absolute; background:#0d0d0d; border:1px solid var(--border); border-radius:9px; padding:8px 11px; font-size:11.5px; pointer-events:none; z-index:5; box-shadow:0 8px 22px rgba(0,0,0,.5); white-space:nowrap;}
+.chart-empty{display:flex; align-items:center; justify-content:center; height:220px; color:var(--text3); font-size:12.5px;}
+
+.pill-tabs{display:flex; gap:6px; flex-wrap:wrap;}
+.pill{padding:6px 12px; border-radius:20px; background:#101010; border:1px solid var(--border); color:var(--text2); font-size:11.6px; font-weight:700; cursor:pointer;}
+.pill.active{background:rgba(255,212,0,.12); color:var(--yellow); border-color:rgba(255,212,0,.3);}
+
+.demo-flag{color:var(--text3); font-size:10px; font-weight:800; border:1px dashed var(--border); padding:1px 6px; border-radius:6px; text-transform:uppercase; letter-spacing:.04em;}
+.divider{height:1px; background:var(--border-soft); margin:16px 0;}
+.mini-stat{display:flex; flex-direction:column; gap:3px;}
+.mini-stat .lbl{font-size:10.8px; color:var(--text3); font-weight:700; text-transform:uppercase; letter-spacing:.04em;}
+.mini-stat .val{font-size:16px; font-weight:800;}
+.list-plain{display:flex; flex-direction:column; gap:2px;}
+.list-row{display:flex; align-items:center; justify-content:space-between; padding:10px 4px; border-bottom:1px solid var(--border-soft); gap:10px;}
+.list-row:last-child{border-bottom:none;}
+.avatar{width:30px; height:30px; border-radius:9px; background:#232323; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:var(--text2); flex:none;}
+.pagination{display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:10px 4px; font-size:12px; color:var(--text2);}
+
+.settings-section{margin-bottom:26px;}
+.settings-section h3{font-size:14px; margin-bottom:4px;}
+.settings-section .sub{color:var(--text3); font-size:12px; margin-bottom:14px;}
+.tag-chip{display:inline-flex; align-items:center; gap:6px; background:#101010; border:1px solid var(--border); padding:6px 10px; border-radius:20px; font-size:12px; font-weight:700; margin:0 6px 6px 0;}
+.tag-chip button{background:none; border:none; color:var(--text3); cursor:pointer; display:flex; padding:0;}
+.tag-chip button:hover{color:var(--danger);}
+.category-cost-type{font-size:10.5px; color:var(--text3); font-weight:600;}
+
+@media (max-width:860px){
+  #content .grid{grid-template-columns:1fr !important;}
+}
+@media (max-width:900px){
+  #sidebar{position:fixed; left:0; top:0; height:100vh; transform:translateX(-100%); transition:transform .2s ease; box-shadow:0 0 0 2000px rgba(0,0,0,0);}
+  #sidebar.mobile-open{transform:translateX(0); box-shadow:0 0 0 2000px rgba(0,0,0,.5);}
+  #sidebar.collapsed{width:var(--sidebar-w);}
+  #sidebar.collapsed .brand-text, #sidebar.collapsed .nav-item span.label{display:block;}
+  .sidebar-collapse-btn{display:none;}
+  .hamburger{display:flex;}
+  #content{padding:18px 14px 90px;}
+  #topbar{padding:12px 14px;}
+  .greeting h1{font-size:16px;}
+}
+
+/* ---- Login gate ---- */
+#app-shell{display:none;}
+#app-shell.unlocked{display:flex;}
+.login-gate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 20%, #151515 0%, #080808 65%);padding:20px;}
+.login-gate.hidden{display:none;}
+.login-card{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 28px;text-align:center;}
+.login-card .brand-mark{width:44px;height:44px;border-radius:11px;background:var(--yellow);color:#151300;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.login-card h2{font-size:17px;font-weight:700;margin:0 0 4px;}
+.login-card p{color:var(--text2);font-size:13px;margin:0 0 20px;}
+.login-card input{width:100%;box-sizing:border-box;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:11px 13px;font-size:14px;font-family:inherit;margin-bottom:10px;outline:none;}
+.login-card input:focus{border-color:var(--yellow);}
+.login-card button{width:100%;background:var(--yellow);color:#151300;border:none;border-radius:var(--radius-sm);padding:11px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px;}
+.login-card button:hover{background:var(--gold);}
+.login-card .err{color:var(--danger);font-size:12.5px;min-height:16px;margin-top:10px;}
+</style>
+
+<div class="login-gate" id="loginGate">
+  <div class="login-card">
+    <div class="brand-mark">A</div>
+    <h2>Ad Business Tracker</h2>
+    <p>Ad Genius Marketing PH — enter password to continue</p>
+    <form id="loginForm">
+      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" autofocus>
+      <button type="submit">Unlock</button>
+      <div class="err" id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app-shell">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-text"><b>AD BUSINESS<br>TRACKER</b></div>
+      <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar"></button>
+    </div>
+    <nav class="navlist" id="navlist"></nav>
+    <div class="sidebar-foot" id="sidebarFoot"></div>
+  </aside>
+
+  <div id="main">
+    <div id="topbar">
+      <button class="hamburger" id="hamburgerBtn"></button>
+      <div class="greeting">
+        <h1 id="greetingText">Good day, Boss</h1>
+        <p id="greetingSub">Here's how your business is performing.</p>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" id="globalSearchBtn"></button>
+        <div id="dateRangeControl"></div>
+      </div>
+    </div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<button id="quick-add-fab"></button>
+<div id="quick-add-menu"></div>
+<div id="modal-root"><div class="modal-overlay" id="modalOverlay"></div><div id="modalPanelSlot"></div></div>
+<div id="search-overlay"><div class="modal-overlay" id="searchOverlay"></div><div class="search-panel" id="searchPanel"></div></div>
+<div id="toast-root"></div>
+
+<script>
+'use strict';
+/* =========================================================================
+   1. ICONS
+   ========================================================================= */
+const ICONS = {
+  dashboard:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  sales:'<polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/>',
+  transactions:'<polyline points="17 3 21 7 17 11"/><path d="M3 7h18"/><polyline points="7 21 3 17 7 13"/><path d="M21 17H3"/>',
+  services:'<path d="M21 8V7l-3-4H6L3 7v1"/><path d="M3 8h18l-1.5 12a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2Z"/><path d="M9 12a3 3 0 0 0 6 0"/>',
+  clients:'<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.3" cy="9" r="2.6"/><path d="M16 14.2c2.7.4 4.7 2.3 4.7 5.3"/>',
+  receivables:'<path d="M6 3h9l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/>',
+  expenses:'<rect x="2.5" y="5" width="19" height="14" rx="2.2"/><path d="M2.5 10h19"/><path d="M6 15h4"/>',
+  advertising:'<path d="M3 10v4a1 1 0 0 0 1 1h2l7 4V5L6 9H4a1 1 0 0 0-1 1Z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M20 5a9 9 0 0 1 0 14"/>',
+  team:'<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><polyline points="15.5 10 17.3 11.8 21 8"/>',
+  cash:'<path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h13A1.5 1.5 0 0 1 19 7.5v10A1.5 1.5 0 0 1 17.5 19h-13A1.5 1.5 0 0 1 3 17.5Z"/><path d="M19 10h1.5A1.5 1.5 0 0 1 22 11.5v5a1.5 1.5 0 0 1-1.5 1.5H19"/><circle cx="14.5" cy="13" r="1.6"/>',
+  targets:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".9" fill="currentColor"/>',
+  reports:'<path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/><path d="M2.5 20h19"/>',
+  alerts:'<path d="M18 16v-5a6 6 0 0 0-12 0v5l-2 2.5h16Z"/><path d="M9.5 21a2.5 2.5 0 0 0 5 0"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H2.5a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.9.3H8.9A1.7 1.7 0 0 0 9.9 2.9V2.5a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  trash:'<path d="M3 6h18"/><path d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V6"/><path d="M19 6l-.9 13.5A2 2 0 0 1 16.1 21H7.9a2 2 0 0 1-2-1.5L5 6"/><path d="M10 11v6M14 11v6"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  close:'<path d="M18 6 6 18M6 6l12 12"/>',
+  chevronDown:'<path d="M6 9l6 6 6-6"/>',
+  chevronRight:'<path d="M9 6l6 6-6 6"/>',
+  chevronLeft:'<path d="M15 6l-6 6 6 6"/>',
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  filter:'<path d="M4 5h16l-6.5 7.5V19l-3 2v-8.5Z"/>',
+  download:'<path d="M12 4v11"/><polyline points="7 11 12 16 17 11"/><path d="M4 19h16"/>',
+  upload:'<path d="M12 20V9"/><polyline points="7 13 12 8 17 13"/><path d="M4 19h16"/>',
+  check:'<path d="M4 12l5 5L20 6"/>',
+  arrowUp:'<path d="M12 19V5"/><polyline points="6 11 12 5 18 11"/>',
+  arrowDown:'<path d="M12 5v14"/><polyline points="6 13 12 19 18 13"/>',
+  minus:'<path d="M5 12h14"/>',
+  dot:'<circle cx="12" cy="12" r="4"/>',
+  x:'<circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/>',
+  bolt:'<path d="M13 3 4 14h6l-1 7 9-11h-6Z"/>',
+  wallet2:'<path d="M20 7H6a3 3 0 0 0 0 6h12"/><rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="16" cy="13" r="1.3"/>',
+  users:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.9c2.6.4 4.5 2.2 4.5 5.1"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 8h.01"/>',
+  star:'<path d="M12 3l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L12 16.9 6.4 20l1.4-6.2-4.8-4.3 6.4-.6Z"/>',
+  refresh:'<path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/>',
+  building:'<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+};
+function icon(name, cls){ return '<svg class="icon '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||ICONS.dot)+'</svg>'; }
+
+/* =========================================================================
+   2. UTILITIES
+   ========================================================================= */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function pad2(n){ return n<10?'0'+n:''+n; }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function monthKey(dateStr){ return (dateStr||todayStr()).slice(0,7); }
+function parseDate(s){ if(!s) return null; const p=s.split('-'); return new Date(+p[0], +p[1]-1, +p[2]||1); }
+function toDateStr(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function addDays(dateStr, n){ const d=parseDate(dateStr); d.setDate(d.getDate()+n); return toDateStr(d); }
+function safeNum(v){ const n = typeof v==='number'?v:parseFloat(v); return Number.isFinite(n)?n:0; }
+function safeDiv(a,b){ a=safeNum(a); b=safeNum(b); return b?a/b:0; }
+function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+function round0(n){ return Math.round(safeNum(n)); }
+function escapeHtml(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function currencySymbol(){ return (Settings().currencySymbol)||'₱'; }
+function s_currCode(){ return (Settings().currencyCode)||'PHP'; }
+function fmtMoney(n, opts){
+  opts=opts||{};
+  n = safeNum(n);
+  const neg = n<0; n = Math.abs(n);
+  const dec = opts.decimals!=null?opts.decimals:0;
+  const s = n.toLocaleString('en-PH',{minimumFractionDigits:dec, maximumFractionDigits:dec});
+  return (neg?'-':'')+currencySymbol()+s;
+}
+function fmtNum(n,dec){ n=safeNum(n); return n.toLocaleString('en-PH',{minimumFractionDigits:dec||0,maximumFractionDigits:dec!=null?dec:2}); }
+function fmtPct(n, dec){ n=safeNum(n); if(!Number.isFinite(n)) n=0; return (n*100).toFixed(dec!=null?dec:1)+'%'; }
+function fmtDate(s){ if(!s) return '—'; const d=parseDate(s); if(!d||isNaN(d)) return '—'; return d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtDateShort(s){ if(!s) return '—'; const d=parseDate(s); if(!d||isNaN(d)) return '—'; return d.toLocaleDateString('en-PH',{month:'short',day:'numeric'}); }
+function fmtMonthLabel(mk){ const d=parseDate(mk+'-01'); return d.toLocaleDateString('en-PH',{month:'short',year:'numeric'}); }
+function daysBetween(a,b){ const da=parseDate(a), db=parseDate(b); return Math.round((db-da)/86400000); }
+function debounce(fn,ms){ let t; return function(...a){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,a),ms); }; }
+function pctChangeLabel(curr,prev){
+  curr=safeNum(curr); prev=safeNum(prev);
+  if(prev===0){ if(curr===0) return {cls:'flat',text:'No change'}; return {cls:'up',text:'New activity'}; }
+  const c=(curr-prev)/Math.abs(prev);
+  const cls = c>0.001?'up':(c<-0.001?'down':'flat');
+  return {cls, text:(c>=0?'+':'')+fmtPct(c)+' vs last period'};
+}
+function initials(name){ if(!name) return '?'; const p=name.trim().split(/\s+/); return ((p[0]||'')[0]||'')+((p[1]||'')[0]||''); }
+
+/* =========================================================================
+   3. DATA LAYER
+   ========================================================================= */
+const STORAGE_KEY='abt_state_v1';
+let STATE = null;
+
+function freshState(){
+  return {
+    schemaVersion: 1,
+    createdAt: todayStr(),
+    settings:{
+      businessName:'Ad Genius Marketing PH',
+      ownerName:'Boss',
+      currencyCode:'PHP',
+      currencySymbol:'₱',
+      timezone:'Asia/Manila',
+      thresholds:{ highCPM:150, lowROAS:2, highAdSpendDaily:5000, goodROAS:4 },
+      tax:{ withholdingPct:0, vatOnAdsPct:0, notes:'' },
+      paymentMethods:['GCash','Maya','Bank Transfer','PayPal','Wise','Cash','Card'],
+      offerCategories:{
+        'Service':['AI UGC Video Ads','AI Avatar Videos','Video Editing','Static Image Creatives','Social Media Content','Meta Ads Management','Chatbot Automation','Website Development','Creative Strategy','Scriptwriting','Voice Over','Marketing Consultation','Other Service'],
+        'Digital Product':['Online Course','Training','Templates','Prompt Packs','Digital Guides','Membership','Software / Tool Access','Downloadable Product','Other Digital Product']
+      },
+      teamRoles:['Video Editor','Graphic Designer','Virtual Assistant','Media Buyer','Sales','Chatbot Specialist','Developer','Freelancer','Other']
+    },
+    offers:[], clients:[], sales:[], expenses:[], expenseCategories:[], campaigns:[],
+    teamMembers:[], payroll:[], cashAccounts:[], accountTransactions:[], targets:[],
+    dismissedAlerts:[]
+  };
+}
+
+function DB_load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ STATE = JSON.parse(raw); if(!STATE.settings) STATE.settings=freshState().settings; return; }
+  }catch(e){ console.warn('Could not read saved data, starting fresh.', e); }
+  STATE = freshState();
+  seedDemoData(STATE);
+  DB_save();
+}
+function DB_save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); }
+  catch(e){ toast('Could not save changes — your browser storage may be full.', 'error'); }
+}
+function Settings(){ return STATE.settings; }
+
+function nowRecord(extra){ const t=Date.now(); return Object.assign({id:uid(), created_at:t, updated_at:t, deleted:false}, extra); }
+function touch(rec){ rec.updated_at = Date.now(); }
+
+const Entities = {
+  list(col){ return (STATE[col]||[]).filter(r=>!r.deleted); },
+  get(col,id){ return (STATE[col]||[]).find(r=>r.id===id && !r.deleted); },
+  create(col, data){ const rec = nowRecord(data); STATE[col].push(rec); DB_save(); return rec; },
+  update(col, id, patch){ const rec = STATE[col].find(r=>r.id===id); if(!rec) return null; Object.assign(rec, patch); touch(rec); DB_save(); return rec; },
+  softDelete(col, id){ const rec = STATE[col].find(r=>r.id===id); if(!rec) return; rec.deleted=true; touch(rec); DB_save(); },
+  duplicate(col, id){ const rec = Entities.get(col,id); if(!rec) return null; const copy = nowRecord(Object.assign({}, rec, {id:undefined})); delete copy.id; const r2=nowRecord(copy); STATE[col].push(r2); DB_save(); return r2; }
+};
+
+/* =========================================================================
+   4. DEMO DATA
+   ========================================================================= */
+function seedDemoData(state){
+  const mk = (col,data)=>{ const r = nowRecord(Object.assign({is_demo:true}, data)); state[col].push(r); return r; };
+
+  const accGcash = mk('cashAccounts',{name:'GCash', type:'GCash', openingBalance:25000, currency:'PHP', fxRateToPHP:1});
+  const accBank = mk('cashAccounts',{name:'Bank — BPI', type:'Bank', openingBalance:120000, currency:'PHP', fxRateToPHP:1});
+  const accPaypal = mk('cashAccounts',{name:'PayPal', type:'PayPal', openingBalance:23200, currency:'USD', fxRateToPHP:58});
+  const accMaya = mk('cashAccounts',{name:'Maya', type:'Maya', openingBalance:8000, currency:'PHP', fxRateToPHP:1});
+  mk('cashAccounts',{name:'Petty Cash', type:'Cash', openingBalance:5000, currency:'PHP', fxRateToPHP:1});
+
+  const catDefs = [
+    ['Meta Ads','advertising','variable',true],['Google Ads','advertising','variable',true],['TikTok Ads','advertising','variable',true],
+    ['Editor Payments','opex','variable',false],['VA / Staff','opex','fixed',false],['Freelancers','opex','variable',false],
+    ['AI Tools','opex','fixed',false],['Software Subscriptions','opex','fixed',false],['Website / Hosting','opex','fixed',false],
+    ['Domain','opex','fixed',false],['Internet','opex','fixed',false],['Equipment','opex','variable',false],
+    ['Training / Education','opex','variable',false],['Payment Processing Fees','direct','variable',false],
+    ['Commissions','payroll','variable',false],['Refunds','direct','variable',false],['Office Expenses','opex','fixed',false],
+    ['Transportation','opex','variable',false],['Taxes','other','variable',false],['Professional Fees','opex','variable',false],
+    ['Miscellaneous','other','variable',false]
+  ];
+  const catMap = {};
+  catDefs.forEach(([name,costType,behavior,autoOnly])=>{ const r = mk('expenseCategories',{name,costType,behavior,autoOnly,builtIn:true}); catMap[name]=r.id; });
+
+  const offerDefs = [
+    ['AI UGC Video Ads','Service','AI UGC Video Ads',12000,9000,2500,1800,3],
+    ['AI Clone Avatar','Service','AI Avatar Videos',15000,12000,3000,2000,3],
+    ['Static Image Package','Service','Static Image Creatives',6000,4800,1200,900,3],
+    ['Meta Ads Management','Service','Meta Ads Management',20000,18000,0,0,0],
+    ['Chatbot Setup','Service','Chatbot Automation',18000,15000,4000,0,0],
+    ['Website Package','Service','Website Development',35000,30000,9000,0,0],
+    ['AI Creatives Course','Digital Product','Online Course',4999,2999,300,500,3],
+    ['Prompt Pack Vol.1','Digital Product','Prompt Packs',999,499,50,80,3],
+  ];
+  const offers = offerDefs.map(([name,type,category,reg,promo,cost,ad,feepct])=> mk('offers',{name,type,category,regularPrice:reg,promoPrice:promo,fulfillmentCost:cost,adAllocation:ad,paymentFeePct:feepct,status:'Active'}));
+  const offerId = n => offers.find(o=>o.name===n).id;
+
+  const clientDefs = [
+    ['Cosmetic Cocoon — QC Branch','Cosmetic Cocoon','+63 917 000 1111','qc@cosmeticcocoon.ph','Completed','Reodel B.'],
+    ['Avinichi Aesthetics','Avinichi','+63 917 222 3333','hello@avinichi.ph','In Production','Reodel B.'],
+    ['La Rose Manila','La Rose Manila','+63 917 444 5555','marketing@larosemanila.ph','Confirmed','Mina'],
+    ['Soul Luna PH','Soul Luna','+63 917 666 7777','ops@soulluna.ph','For Review','Vince'],
+    ['La Rose Cebu','La Rose Cebu','+63 917 888 9999','cebu@larose.ph','New Lead','Reodel B.'],
+    ['Juan Dela Cruz (Course)','—','+63 917 111 2222','juan@email.com','Completed','Reodel B.'],
+  ];
+  const clients = clientDefs.map(([name,company,phone,email,status,mgr])=> mk('clients',{name,company,phone,email,projectStatus:status,accountManager:mgr,startDate:addDays(todayStr(),-45),deadline:addDays(todayStr(),10),notes:''}));
+  const clientId = n => clients.find(c=>c.name===n).id;
+
+  const methods = ['GCash','Bank Transfer','PayPal','Maya'];
+  const platformCat = {'Meta Ads':'Meta Ads','TikTok Ads':'TikTok Ads','Google Ads':'Google Ads'};
+
+  // 75 days of sales history
+  const salesRows = [
+    [-60,'Cosmetic Cocoon — QC Branch','AI UGC Video Ads',3,'Paid',accBank.id],
+    [-58,'Avinichi Aesthetics','Meta Ads Management',1,'Paid',accGcash.id],
+    [-52,'La Rose Manila','Static Image Package',2,'Paid',accGcash.id],
+    [-50,'Juan Dela Cruz (Course)','AI Creatives Course',1,'Paid',accPaypal.id],
+    [-45,'Soul Luna PH','Chatbot Setup',1,'Partial',accBank.id],
+    [-40,'La Rose Cebu','AI Clone Avatar',2,'Paid',accGcash.id],
+    [-36,'Cosmetic Cocoon — QC Branch','Meta Ads Management',1,'Paid',accBank.id],
+    [-33,'Avinichi Aesthetics','AI UGC Video Ads',4,'Paid',accGcash.id],
+    [-30,'La Rose Manila','Website Package',1,'Partial',accBank.id],
+    [-28,'Juan Dela Cruz (Course)','Prompt Pack Vol.1',1,'Paid',accPaypal.id],
+    [-25,'Soul Luna PH','AI UGC Video Ads',2,'Paid',accMaya.id],
+    [-22,'La Rose Cebu','Meta Ads Management',1,'Paid',accBank.id],
+    [-19,'Cosmetic Cocoon — QC Branch','Static Image Package',3,'Paid',accGcash.id],
+    [-16,'Avinichi Aesthetics','AI Clone Avatar',1,'Pending',accBank.id],
+    [-14,'La Rose Manila','AI UGC Video Ads',2,'Paid',accGcash.id],
+    [-12,'Soul Luna PH','Meta Ads Management',1,'Paid',accBank.id],
+    [-10,'La Rose Cebu','Chatbot Setup',1,'Partial',accGcash.id],
+    [-8,'Cosmetic Cocoon — QC Branch','AI UGC Video Ads',5,'Paid',accBank.id],
+    [-6,'Avinichi Aesthetics','Static Image Package',2,'Paid',accGcash.id],
+    [-5,'Juan Dela Cruz (Course)','AI Creatives Course',2,'Paid',accPaypal.id],
+    [-4,'La Rose Manila','Meta Ads Management',1,'Paid',accBank.id],
+    [-3,'Soul Luna PH','AI Clone Avatar',1,'Pending',accMaya.id],
+    [-2,'La Rose Cebu','AI UGC Video Ads',3,'Paid',accGcash.id],
+    [-1,'Cosmetic Cocoon — QC Branch','Website Package',1,'Partial',accBank.id],
+    [0,'Avinichi Aesthetics','AI UGC Video Ads',2,'Paid',accGcash.id],
+  ];
+  salesRows.forEach(([offset,cli,offName,qty,pstatus,acct],i)=>{
+    const off = offers.find(o=>o.name===offName);
+    const date = addDays(todayStr(), offset);
+    const price = off.promoPrice;
+    const gross = price*qty;
+    const directCost = off.fulfillmentCost*qty;
+    const paymentFee = round0(gross*(off.paymentFeePct/100));
+    let amountPaid = gross, refund=0;
+    if(pstatus==='Partial') amountPaid = round0(gross*0.5);
+    if(pstatus==='Pending') amountPaid = 0;
+    mk('sales',{
+      date, clientId:clientId(cli), offerId:off.id, type:off.type, category:off.category, qty, price, discount:0,
+      directCost, paymentFee, amountPaid, refund, refundDate:refund?date:'', paymentMethod:methods[i%methods.length],
+      paymentStatus:pstatus, account:acct, campaignId:'', reimbursable:false, dueDate:addDays(date,7), notes:''
+    });
+  });
+  // one refund example
+  const refundSale = state.sales[3];
+  refundSale.refund = 500; refundSale.refundDate = addDays(refundSale.date, 3); refundSale.amountPaid -= 500;
+
+  // Advertising / campaigns, last 45 days
+  const platforms = ['Meta Ads','Meta Ads','TikTok Ads','Meta Ads','Google Ads'];
+  for(let i=0;i<18;i++){
+    const offset = -45 + i*2.5|0;
+    const platform = platforms[i%platforms.length];
+    const off = offers[i%4];
+    const spend = 800 + Math.round(Math.random()*1800);
+    const messages = 20 + Math.round(Math.random()*60);
+    const purchases = Math.max(0, Math.round(messages*(0.05+Math.random()*0.12)));
+    const revenue = purchases * off.promoPrice * (0.6+Math.random()*0.8);
+    mk('campaigns',{ date:addDays(todayStr(),offset), platform, campaignName:platform+' — '+off.name+' Batch '+(i+1), offerId:off.id,
+      adSpend:spend, messages, purchases, revenueGenerated:round0(revenue), account:accGcash.id });
+  }
+
+  // Team & payroll
+  const teamDefs = [
+    ['Mica','Video Editor','Per Output',null,null,900,null],
+    ['Mina','Video Editor','Per Output',null,null,850,null],
+    ['Nis','Graphic Designer','Monthly Salary',18000,null,null,null],
+    ['Romulo','Virtual Assistant','Monthly Salary',15000,null,null,null],
+    ['Vince','Media Buyer','Commission',null,null,null,8],
+  ];
+  const team = teamDefs.map(([name,role,ptype,sal,proj,out,comm])=> mk('teamMembers',{
+    name, role, paymentType:ptype, monthlySalary:sal||0, perProjectRate:proj||0, perOutputRate:out||0, commissionPct:comm||0,
+    nextPayment:addDays(todayStr(),5), status:'Active'
+  }));
+  team.forEach((m,i)=>{
+    mk('payroll',{ teamMemberId:m.id, date:addDays(todayStr(),-4), amount: m.paymentType==='Monthly Salary'?m.monthlySalary: (m.paymentType==='Commission'? 3200 : 8*m.perOutputRate),
+      type: m.paymentType==='Monthly Salary'?'Salary':(m.paymentType==='Commission'?'Commission':'Output'), account:accBank.id, notes:'' });
+  });
+
+  mk('targets',{ month: monthKey(todayStr()), revenueGoal:400000, profitGoal:220000, maxExpenseBudget:150000, maxAdBudget:60000, salesTarget:160, targetRoas:4 });
+  const lastMonth = monthKey(addDays(todayStr(),-32));
+  mk('targets',{ month:lastMonth, revenueGoal:380000, profitGoal:200000, maxExpenseBudget:140000, maxAdBudget:55000, salesTarget:150, targetRoas:4 });
+
+  // Manual expenses
+  const expenseDefs = [
+    [-40,'Canva Pro annual','Software Subscriptions','Canva',6000],
+    [-38,'ChatGPT Team seats','AI Tools','OpenAI',5200],
+    [-35,'Office internet','Internet','PLDT',3000],
+    [-30,'Domain renewal x3','Domain','Namecheap',2400],
+    [-25,'Freelance scriptwriter','Freelancers','J. Reyes',4500],
+    [-20,'Ring light + mic','Equipment','Shopee',3800],
+    [-15,'Hosting — client sites','Website / Hosting','Vercel',1800],
+    [-10,'Grab to client meeting','Transportation','Grab',450],
+    [-6,'Accountant retainer','Professional Fees','CPA Firm',5000],
+    [-2,'Misc supplies','Miscellaneous','SM',620],
+  ];
+  expenseDefs.forEach(([offset,name,cat,vendor,amount])=> mk('expenses',{
+    date:addDays(todayStr(),offset), name, categoryId:catMap[cat], vendor, amount, account:accBank.id,
+    recurring:false, frequency:'', receiptRef:'', notes:'', tag:'Business', reimbursable:false
+  }));
+
+  // Cash: small capital-in memo
+  mk('accountTransactions',{ date:addDays(todayStr(),-60), type:'Capital In', fromAccount:'', toAccount:accBank.id, amount:50000, notes:'Owner capital top-up' });
+}
+
+/* =========================================================================
+   5. CALCULATION ENGINE
+   ========================================================================= */
+function inRange(dateStr, start, end){ return dateStr>=start && dateStr<=end; }
+
+function Calc_saleGross(s){ return safeNum(s.qty)*safeNum(s.price) - safeNum(s.discount); }
+function Calc_saleNet(s){ return Calc_saleGross(s) - safeNum(s.paymentFee) - safeNum(s.refund); }
+function Calc_saleProfit(s){ return Calc_saleGross(s) - safeNum(s.directCost) - safeNum(s.paymentFee) - safeNum(s.refund); }
+function Calc_saleBalance(s){ return Math.max(0, Calc_saleGross(s) - safeNum(s.refund) - safeNum(s.amountPaid)); }
+function Calc_saleStatus(s){
+  const bal = Calc_saleBalance(s);
+  if(bal<=0.5) return 'Paid';
+  if(s.dueDate && s.dueDate < todayStr() && safeNum(s.amountPaid)===0) return 'Overdue';
+  if(s.dueDate && s.dueDate < todayStr()) return 'Overdue';
+  if(safeNum(s.amountPaid)>0) return 'Partial';
+  return 'Pending';
+}
+function categoryOf(id){ return Entities.get('expenseCategories', id); }
+function offerOf(id){ return Entities.get('offers', id); }
+function clientOf(id){ return Entities.get('clients', id); }
+function accountOf(id){ return Entities.get('cashAccounts', id); }
+function memberOf(id){ return Entities.get('teamMembers', id); }
+
+// Unified expense-line view: manual expenses (non pass-through) + ad spend + payroll payments.
+function getAllExpenseLines(range){
+  const lines = [];
+  Entities.list('expenses').forEach(e=>{
+    if(e.reimbursable) return;
+    const cat = categoryOf(e.categoryId);
+    lines.push({ id:'exp_'+e.id, date:e.date, name:e.name, categoryName: cat?cat.name:'Uncategorized',
+      costType: cat?cat.costType:'other', behavior: cat?cat.behavior:'variable', amount:safeNum(e.amount), account:e.account, source:'manual', ref:e });
+  });
+  Entities.list('campaigns').forEach(c=>{
+    lines.push({ id:'ad_'+c.id, date:c.date, name:c.campaignName||c.platform, categoryName:c.platform,
+      costType:'advertising', behavior:'variable', amount:safeNum(c.adSpend), account:c.account, source:'advertising', ref:c });
+  });
+  Entities.list('payroll').forEach(p=>{
+    const m = memberOf(p.teamMemberId);
+    lines.push({ id:'pr_'+p.id, date:p.date, name:(m?m.name:'Team member')+' — '+p.type, categoryName:'Team Payroll',
+      costType:'payroll', behavior: (m && m.paymentType==='Monthly Salary') ? 'fixed':'variable', amount:safeNum(p.amount), account:p.account, source:'payroll', ref:p });
+  });
+  if(range) return lines.filter(l=>inRange(l.date, range.start, range.end));
+  return lines;
+}
+
+function Calc_period(range){
+  const sales = Entities.list('sales').filter(s=>inRange(s.date, range.start, range.end));
+  const refundsInRange = Entities.list('sales').filter(s=> s.refund>0 && s.refundDate && inRange(s.refundDate, range.start, range.end));
+  const grossRevenue = sales.reduce((a,s)=>a+Calc_saleGross(s),0);
+  const refundsTotal = refundsInRange.reduce((a,s)=>a+safeNum(s.refund),0);
+  const netRevenue = grossRevenue - refundsTotal;
+  const directCosts = sales.reduce((a,s)=>a+safeNum(s.directCost),0);
+  const paymentFees = sales.reduce((a,s)=>a+safeNum(s.paymentFee),0);
+  const grossProfit = netRevenue - directCosts - paymentFees;
+
+  const lines = getAllExpenseLines(range);
+  const adSpend = lines.filter(l=>l.costType==='advertising').reduce((a,l)=>a+l.amount,0);
+  const payrollCost = lines.filter(l=>l.costType==='payroll').reduce((a,l)=>a+l.amount,0);
+  const opexCost = lines.filter(l=>l.costType==='opex').reduce((a,l)=>a+l.amount,0);
+  const otherCost = lines.filter(l=>l.costType==='other'||l.costType==='direct').reduce((a,l)=>a+l.amount,0);
+  const totalExpenses = adSpend+payrollCost+opexCost+otherCost+directCosts+paymentFees;
+
+  const netProfit = grossProfit - opexCost - adSpend - payrollCost - otherCost;
+  const campaigns = Entities.list('campaigns').filter(c=>inRange(c.date, range.start, range.end));
+  const revenueFromAds = campaigns.reduce((a,c)=>a+safeNum(c.revenueGenerated),0);
+  const totalMessages = campaigns.reduce((a,c)=>a+safeNum(c.messages),0);
+  const totalPurchases = campaigns.reduce((a,c)=>a+safeNum(c.purchases),0);
+
+  const cashCollected = sales.reduce((a,s)=>a+safeNum(s.amountPaid),0) +
+    Entities.list('sales').filter(s=> !inRange(s.date,range.start,range.end)).reduce((a,s)=>0+a,0); // amount-paid-on-sale-date simplification
+
+  return {
+    sales, grossRevenue, refundsTotal, netRevenue, directCosts, paymentFees, grossProfit,
+    adSpend, payrollCost, opexCost, otherCost, totalExpenses, netProfit,
+    revenueFromAds, totalMessages, totalPurchases, campaigns,
+    roasBlended: safeDiv(netRevenue, adSpend),
+    roasAttributed: safeDiv(revenueFromAds, adSpend),
+    cpm: safeDiv(adSpend, totalMessages),
+    cpp: safeDiv(adSpend, totalPurchases),
+    netMargin: safeDiv(netProfit, netRevenue),
+    grossMargin: safeDiv(grossProfit, netRevenue),
+    aov: safeDiv(grossRevenue, sales.length),
+    expenseRatio: safeDiv(totalExpenses, netRevenue),
+    adSpendPct: safeDiv(adSpend, netRevenue),
+    cashCollected,
+    lines,
+  };
+}
+
+function Calc_outstandingReceivables(){
+  return Entities.list('sales').filter(s=>Calc_saleBalance(s)>0.5);
+}
+
+function Calc_cashAccountBalance(accId){
+  const acc = accountOf(accId); if(!acc) return 0;
+  let bal = safeNum(acc.openingBalance);
+  Entities.list('sales').forEach(s=>{ if(s.account===accId){ bal += safeNum(s.amountPaid); } if(s.refund>0 && s.account===accId){ bal -= safeNum(s.refund); } });
+  getAllExpenseLines().forEach(l=>{ if(l.account===accId) bal -= l.amount; });
+  Entities.list('accountTransactions').forEach(t=>{
+    const amt = safeNum(t.amount);
+    if(t.toAccount===accId && ['Transfer','Capital In','Loan In'].includes(t.type)) bal += amt;
+    if(t.fromAccount===accId && ['Transfer',"Owner's Draw",'Loan Out'].includes(t.type)) bal -= amt;
+  });
+  return bal;
+}
+function Calc_cashAccountMoveDates(accId){
+  const dates=[];
+  Entities.list('sales').forEach(s=>{ if(s.account===accId) dates.push(s.date); });
+  getAllExpenseLines().forEach(l=>{ if(l.account===accId) dates.push(l.date); });
+  Entities.list('accountTransactions').forEach(t=>{ if(t.toAccount===accId||t.fromAccount===accId) dates.push(t.date); });
+  dates.sort();
+  return dates.length?dates[dates.length-1]:null;
+}
+function Calc_cashAccountFlow(accId, range){
+  let inAmt=0, outAmt=0;
+  Entities.list('sales').forEach(s=>{
+    if(s.account===accId && inRange(s.date,range.start,range.end)) inAmt += safeNum(s.amountPaid);
+    if(s.account===accId && s.refund>0 && s.refundDate && inRange(s.refundDate,range.start,range.end)) outAmt += safeNum(s.refund);
+  });
+  getAllExpenseLines(range).forEach(l=>{ if(l.account===accId) outAmt += l.amount; });
+  Entities.list('accountTransactions').forEach(t=>{
+    if(!inRange(t.date,range.start,range.end)) return;
+    const amt = safeNum(t.amount);
+    if(t.toAccount===accId && ['Transfer','Capital In','Loan In'].includes(t.type)) inAmt+=amt;
+    if(t.fromAccount===accId && ['Transfer',"Owner's Draw",'Loan Out'].includes(t.type)) outAmt+=amt;
+  });
+  return {inAmt, outAmt};
+}
+
+function Calc_clientTotals(clientId){
+  const sales = Entities.list('sales').filter(s=>s.clientId===clientId);
+  const totalContractValue = sales.reduce((a,s)=>a+Calc_saleGross(s),0);
+  const amountPaid = sales.reduce((a,s)=>a+safeNum(s.amountPaid),0);
+  const remainingBalance = sales.reduce((a,s)=>a+Calc_saleBalance(s),0);
+  let paymentStatus = 'Pending';
+  if(sales.length===0) paymentStatus='—';
+  else if(remainingBalance<=0.5) paymentStatus='Paid';
+  else if(amountPaid>0) paymentStatus='Partial';
+  if(sales.some(s=>Calc_saleStatus(s)==='Overdue')) paymentStatus='Overdue';
+  return {totalContractValue, amountPaid, remainingBalance, paymentStatus, salesCount:sales.length};
+}
+
+function Calc_memberAmounts(memberId){
+  const m = memberOf(memberId); if(!m) return {due:0,paidThisMonth:0,remaining:0,lastPayment:null};
+  const mk = monthKey(todayStr());
+  const payments = Entities.list('payroll').filter(p=>p.teamMemberId===memberId);
+  const paidThisMonth = payments.filter(p=>monthKey(p.date)===mk).reduce((a,p)=>a+safeNum(p.amount),0);
+  let due = 0;
+  if(m.paymentType==='Monthly Salary') due = safeNum(m.monthlySalary);
+  else if(m.paymentType==='Commission'){
+    const sales = Entities.list('sales').filter(s=> monthKey(s.date)===mk);
+    const attributed = sales.reduce((a,s)=>a+Calc_saleNet(s),0) * (safeNum(m.commissionPct)/100);
+    due = attributed;
+  } else { due = paidThisMonth; }
+  const remaining = Math.max(0, due - paidThisMonth);
+  const lastPayment = payments.length ? payments.map(p=>p.date).sort().slice(-1)[0] : null;
+  return {due, paidThisMonth, remaining, lastPayment};
+}
+
+function Calc_breakeven(range){
+  const lines = getAllExpenseLines(range);
+  const fixed = lines.filter(l=>l.behavior==='fixed').reduce((a,l)=>a+l.amount,0);
+  const p = Calc_period(range);
+  const contributionMargin = safeDiv(p.grossProfit, p.netRevenue);
+  const breakEvenRevenue = contributionMargin>0 ? fixed/contributionMargin : 0;
+  const avgOrder = p.aov||1;
+  const salesNeeded = contributionMargin>0 ? Math.ceil(safeDiv(breakEvenRevenue, avgOrder)) : 0;
+  return { fixed, contributionMargin, breakEvenRevenue, salesNeeded, currentRevenue:p.netRevenue, passed: p.netRevenue>=breakEvenRevenue && breakEvenRevenue>0 };
+}
+
+/* =========================================================================
+   6. DATE RANGES
+   ========================================================================= */
+const RANGE_PRESETS = ['Today','Yesterday','This Week','This Month','Last Month','This Quarter','This Year','Custom Range'];
+let APP = {
+  route: 'dashboard',
+  range: null,
+  reportsRange: null,
+  sidebarCollapsed: false,
+  mobileOpen: false,
+};
+
+function startOfWeek(d){ const dt=new Date(d); const day=dt.getDay(); const diff=(day===0?-6:1-day); dt.setDate(dt.getDate()+diff); return dt; }
+function resolveRange(preset, custom){
+  const t = new Date();
+  const today = todayStr();
+  let start=today, end=today, label=preset;
+  switch(preset){
+    case 'Today': start=today; end=today; break;
+    case 'Yesterday': start=addDays(today,-1); end=addDays(today,-1); break;
+    case 'This Week': { const s=startOfWeek(t); start=toDateStr(s); end=today; break; }
+    case 'This Month': start=today.slice(0,8)+'01'; end=today; break;
+    case 'Last Month': { const d=new Date(t.getFullYear(), t.getMonth()-1, 1); const s=toDateStr(d); const e=new Date(t.getFullYear(),t.getMonth(),0); start=s; end=toDateStr(e); break; }
+    case 'This Quarter': { const q=Math.floor(t.getMonth()/3); const s=new Date(t.getFullYear(), q*3, 1); start=toDateStr(s); end=today; break; }
+    case 'This Year': start=today.slice(0,4)+'-01-01'; end=today; break;
+    case 'Custom Range': start=(custom&&custom.start)||today; end=(custom&&custom.end)||today; break;
+    default: start=today.slice(0,8)+'01'; end=today;
+  }
+  return {preset, start, end, label};
+}
+function previousEquivalent(range){
+  const days = daysBetween(range.start, range.end)+1;
+  const end = addDays(range.start, -1);
+  const start = addDays(end, -(days-1));
+  return {preset:'Previous', start, end};
+}
+function rangeDisplay(range){
+  if(range.preset!=='Custom Range' && range.start===range.end) return fmtDate(range.start);
+  return fmtDateShort(range.start)+' – '+fmtDateShort(range.end)+', '+range.end.slice(0,4);
+}
+
+/* =========================================================================
+   7. UI PRIMITIVES: toast / confirm / modal
+   ========================================================================= */
+function toast(msg, type){
+  const root = document.getElementById('toast-root');
+  const el = document.createElement('div');
+  el.className = 'toast '+(type||'success');
+  el.innerHTML = icon(type==='error'?'x':'check')+'<span>'+escapeHtml(msg)+'</span>';
+  root.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity .25s'; el.style.opacity='0'; setTimeout(()=>el.remove(),260); }, 3000);
+}
+
+function closeModal(){
+  document.getElementById('modal-root').classList.remove('open');
+  document.getElementById('modalPanelSlot').innerHTML='';
+}
+function openModalRaw(html, opts){
+  document.getElementById('modalPanelSlot').innerHTML = html;
+  document.getElementById('modal-root').classList.add('open');
+}
+document.getElementById('modalOverlay').addEventListener('click', closeModal);
+
+function confirmDialog(opts){
+  return new Promise(resolve=>{
+    const html = '<div class="modal-panel" role="dialog">'+
+      '<div class="modal-head"><h3>'+escapeHtml(opts.title||'Are you sure?')+'</h3></div>'+
+      '<div class="modal-body"><p style="color:var(--text2); font-size:13px; line-height:1.55;">'+escapeHtml(opts.message||'This action cannot be undone.')+'</p></div>'+
+      '<div class="modal-foot"><button class="btn" id="cfCancel">Cancel</button><button class="btn '+(opts.danger?'btn-danger':'btn-primary')+'" id="cfOk">'+escapeHtml(opts.okText||'Confirm')+'</button></div>'+
+      '</div>';
+    openModalRaw(html);
+    document.getElementById('cfCancel').onclick = ()=>{ closeModal(); resolve(false); };
+    document.getElementById('cfOk').onclick = ()=>{ closeModal(); resolve(true); };
+  });
+}
+
+/* Generic schema-driven form ---------------------------------------------- */
+function optionsForField(f, values){
+  if(typeof f.options==='function') return f.options(values||{});
+  return f.options||[];
+}
+function fieldVisible(f, values){ return f.showIf ? !!f.showIf(values) : true; }
+
+function renderFieldHtml(f, values){
+  const val = values[f.key]!=null?values[f.key]:(f.default!=null?f.default:'');
+  const req = f.required?' <span style="color:var(--danger)">*</span>':'';
+  let inner='';
+  if(f.type==='select'){
+    const opts = optionsForField(f, values);
+    inner = '<select class="select" id="ff_'+f.key+'" '+(f.disabled?'disabled':'')+'>'+
+      (f.placeholder?'<option value="">'+escapeHtml(f.placeholder)+'</option>':'')+
+      opts.map(o=>{ const ov=(typeof o==='object')?o.value:o; const ol=(typeof o==='object')?o.label:o;
+        return '<option value="'+escapeHtml(ov)+'" '+(String(val)===String(ov)?'selected':'')+'>'+escapeHtml(ol)+'</option>'; }).join('')+
+      '</select>';
+  } else if(f.type==='textarea'){
+    inner = '<textarea class="textarea" id="ff_'+f.key+'">'+escapeHtml(val)+'</textarea>';
+  } else if(f.type==='checkbox'){
+    return '<div class="field '+(f.span2?'span-2':'')+'"><label class="check-row"><input type="checkbox" id="ff_'+f.key+'" '+(val?'checked':'')+'> '+escapeHtml(f.label)+'</label>'+(f.hint?'<div class="field-hint">'+escapeHtml(f.hint)+'</div>':'')+'</div>';
+  } else if(f.type==='number'||f.type==='currency'){
+    inner = '<input class="input" type="number" step="any" id="ff_'+f.key+'" value="'+escapeHtml(val)+'" '+(f.min!=null?'min="'+f.min+'"':'')+'>';
+  } else if(f.type==='date'){
+    inner = '<input class="input" type="date" id="ff_'+f.key+'" value="'+escapeHtml(val)+'">';
+  } else {
+    inner = '<input class="input" type="text" id="ff_'+f.key+'" value="'+escapeHtml(val)+'" '+(f.readonly?'readonly':'')+'>';
+  }
+  return '<div class="field '+(f.span2?'span-2':'')+'" data-fieldkey="'+f.key+'">'+
+    '<label class="field-label">'+escapeHtml(f.label)+req+'</label>'+inner+
+    (f.hint?'<div class="field-hint">'+escapeHtml(f.hint)+'</div>':'')+'</div>';
+}
+function readFieldValue(f, values){
+  const el = document.getElementById('ff_'+f.key);
+  if(!el) return values[f.key];
+  if(f.type==='checkbox') return el.checked;
+  if(f.type==='number'||f.type==='currency') return el.value===''?0:parseFloat(el.value);
+  return el.value;
+}
+function refreshFormVisibility(fields, values){
+  fields.forEach(f=>{
+    const wrap = document.querySelector('[data-fieldkey="'+f.key+'"]');
+    if(!wrap) return;
+    wrap.style.display = fieldVisible(f, values) ? '' : 'none';
+  });
+}
+function openEntityForm(cfg, existing){
+  const fields = cfg.fields;
+  let values = Object.assign({}, cfg.defaults?cfg.defaults():{}, existing||{});
+  const isEdit = !!existing;
+  const html = '<div class="modal-panel '+(cfg.wide?'wide':'')+'">'+
+    '<div class="modal-head"><h3>'+(isEdit?'Edit ':'Add ')+escapeHtml(cfg.title)+'</h3>'+
+    '<button class="btn btn-icon btn-ghost" id="formCloseBtn">'+icon('close')+'</button></div>'+
+    '<div class="modal-body"><div class="form-grid" id="entityFormGrid">'+
+    fields.map(f=>renderFieldHtml(f, values)).join('')+
+    '</div></div>'+
+    '<div class="modal-foot">'+(isEdit&&cfg.onDelete?'<button class="btn btn-danger" id="formDeleteBtn" style="margin-right:auto;">'+icon('trash')+' Delete</button>':'')+
+    '<button class="btn" id="formCancelBtn">Cancel</button><button class="btn btn-primary" id="formSaveBtn">'+icon('check')+' Save</button></div>'+
+    '</div>';
+  openModalRaw(html);
+  document.getElementById('formCloseBtn').onclick = closeModal;
+  document.getElementById('formCancelBtn').onclick = closeModal;
+  refreshFormVisibility(fields, values);
+  fields.forEach(f=>{
+    const el = document.getElementById('ff_'+f.key);
+    if(!el) return;
+    el.addEventListener('input', ()=>{
+      values[f.key] = readFieldValue(f, values);
+      if(f.key==='price') values._priceTouched=true;
+      if(f.key==='directCost') values._costTouched=true;
+      if(f.key==='paymentFee') values._feeTouched=true;
+      if(f.onChange) f.onChange(values);
+      fields.forEach(f2=>{
+        if(f2.recompute) values[f2.key]=f2.recompute(values);
+        const e2=document.getElementById('ff_'+f2.key);
+        if(!e2) return;
+        if(f2.recompute){ if(f2.type==='checkbox') e2.checked=values[f2.key]; else e2.value=values[f2.key]; }
+        if(f2.type==='select' && typeof f2.options==='function' && f2.key!==f.key){
+          const curVal = values[f2.key];
+          const opts = optionsForField(f2, values);
+          const stillValid = opts.some(o=>String((typeof o==='object')?o.value:o)===String(curVal));
+          e2.innerHTML = (f2.placeholder?'<option value="">'+escapeHtml(f2.placeholder)+'</option>':'')+
+            opts.map(o=>{ const ov=(typeof o==='object')?o.value:o; const ol=(typeof o==='object')?o.label:o; return '<option value="'+escapeHtml(ov)+'" '+(String(curVal)===String(ov)?'selected':'')+'>'+escapeHtml(ol)+'</option>'; }).join('');
+          if(!stillValid && opts.length){ const firstVal=(typeof opts[0]==='object')?opts[0].value:opts[0]; e2.value=firstVal; values[f2.key]=firstVal; }
+        }
+      });
+      refreshFormVisibility(fields, values);
+    });
+  });
+  if(isEdit && cfg.onDelete){
+    document.getElementById('formDeleteBtn').onclick = async ()=>{
+      const ok = await confirmDialog({title:'Delete '+cfg.title+'?', message:'This will move the record to Trash. You can restore it later from Settings → Data Management.', danger:true, okText:'Delete'});
+      if(ok){ cfg.onDelete(existing); closeModal(); render(); toast(cfg.title+' deleted.'); }
+    };
+  }
+  document.getElementById('formSaveBtn').onclick = ()=>{
+    fields.forEach(f=>{ if(fieldVisible(f,values)) values[f.key]=readFieldValue(f,values); });
+    for(const f of fields){
+      if(f.required && fieldVisible(f,values) && (values[f.key]===''||values[f.key]==null)){
+        toast('Please fill in "'+f.label+'".','error'); return;
+      }
+    }
+    cfg.onSave(values, existing);
+    closeModal(); render();
+    toast(cfg.title+(isEdit?' updated.':' added.'));
+  };
+}
+
+/* Generic list/table page --------------------------------------------------*/
+function paginateArr(arr, page, perPage){ return arr.slice(page*perPage, page*perPage+perPage); }
+
+const CRUD_UI = {};
+function renderCrudPage(container, cfgIn){
+  const uiKey = cfgIn.stateKey||cfgIn.collection;
+  const cfg = Object.assign({}, cfgIn);
+  const ui = CRUD_UI[uiKey] = CRUD_UI[uiKey] || {_page:0,_search:'',_filters:{},_sortKey:null,_sortDir:1};
+  cfg._page = ui._page; cfg._search = ui._search; cfg._filters = ui._filters; cfg._sortKey = ui._sortKey; cfg._sortDir = ui._sortDir;
+  cfg._setPage = v=>{ ui._page=v; }; cfg._setSearch=v=>{ ui._search=v; }; cfg._setFilter=(k,v)=>{ ui._filters[k]=v; };
+
+  let rows = Entities.list(cfg.collection).slice();
+  if(cfg.rangeScoped && APP.range) rows = rows.filter(r=>inRange(r[cfg.dateKey||'date'], APP.range.start, APP.range.end));
+  if(cfg._search){
+    const q = cfg._search.toLowerCase();
+    rows = rows.filter(r=> (cfg.searchText(r)||'').toLowerCase().includes(q));
+  }
+  Object.keys(cfg._filters).forEach(fk=>{
+    const v = cfg._filters[fk];
+    if(v) rows = rows.filter(r=> cfg.filters.find(f=>f.key===fk).match(r,v));
+  });
+  if(cfg._sortKey){
+    rows.sort((a,b)=>{
+      const av = cfg._sortKey(a), bv=cfg._sortKey(b);
+      if(av<bv) return -1*cfg._sortDir; if(av>bv) return 1*cfg._sortDir; return 0;
+    });
+  } else if(cfg.defaultSort){
+    rows.sort(cfg.defaultSort);
+  }
+
+  const total = rows.length;
+  const perPage = cfg.perPage||12;
+  const pageRows = paginateArr(rows, cfg._page, perPage);
+
+  let html = '<div class="page-head"><div><h2>'+cfg.title+'</h2><p class="sub">'+cfg.subtitle+'</p></div>'+
+    '<div class="toolbar">'+
+    (cfg.exportName?'<button class="btn" id="crudExportBtn">'+icon('download')+' Export CSV</button>':'')+
+    '<button class="btn btn-primary" id="crudAddBtn">'+icon('plus')+' Add '+cfg.itemName+'</button>'+
+    '</div></div>';
+
+  html += '<div class="filter-bar">';
+  html += '<div class="search-input-wrap">'+icon('search')+'<input class="input" id="crudSearch" placeholder="Search '+cfg.itemName.toLowerCase()+'s…" value="'+escapeHtml(cfg._search)+'"></div>';
+  (cfg.filters||[]).forEach(f=>{
+    html += '<select class="select" id="crudFilter_'+f.key+'" style="width:auto;"><option value="">'+f.label+' (All)</option>'+
+      f.options.map(o=>'<option value="'+escapeHtml(o)+'" '+(cfg._filters[f.key]===o?'selected':'')+'>'+escapeHtml(o)+'</option>').join('')+'</select>';
+  });
+  html += '</div>';
+
+  if(total===0){
+    html += '<div class="card"><div class="empty-state">'+icon(cfg.icon||'dot','icon-lg')+
+      '<h4>'+cfg.emptyTitle+'</h4><p>'+cfg.emptyDesc+'</p>'+
+      '<button class="btn btn-primary" id="crudEmptyAddBtn">'+icon('plus')+' '+cfg.emptyCta+'</button></div></div>';
+  } else {
+    html += '<div class="table-wrap"><table class="tbl"><thead><tr>'+
+      cfg.columns.map(c=>'<th>'+c.label+'</th>').join('')+'<th></th></tr></thead><tbody>'+
+      pageRows.map(r=> '<tr>'+cfg.columns.map(c=>'<td class="'+(c.cls||'')+'">'+c.render(r)+'</td>').join('')+
+        '<td><div class="row-actions">'+
+        (cfg.rowActions.includes('edit')?'<button class="btn btn-icon btn-ghost" data-act="edit" data-id="'+r.id+'" title="Edit">'+icon('edit')+'</button>':'')+
+        (cfg.rowActions.includes('duplicate')?'<button class="btn btn-icon btn-ghost" data-act="dup" data-id="'+r.id+'" title="Duplicate">'+icon('copy')+'</button>':'')+
+        (cfg.rowActions.includes('delete')?'<button class="btn btn-icon btn-ghost" data-act="del" data-id="'+r.id+'" title="Delete">'+icon('trash')+'</button>':'')+
+        '</div></td></tr>').join('')+
+      '</tbody></table></div>';
+    html += '<div class="pagination"><span>Showing '+(cfg._page*perPage+1)+'–'+Math.min(total,(cfg._page+1)*perPage)+' of '+total+'</span>'+
+      '<button class="btn btn-sm" id="crudPrev" '+(cfg._page===0?'disabled':'')+'>Prev</button>'+
+      '<button class="btn btn-sm" id="crudNext" '+((cfg._page+1)*perPage>=total?'disabled':'')+'>Next</button></div>';
+  }
+  container.innerHTML = html;
+
+  const addHandler = ()=> openEntityForm({
+    title:cfg.itemName, fields:cfg.formFields, wide:cfg.wide, defaults:cfg.formDefaults,
+    onSave:(vals)=> cfg.onCreate(vals)
+  });
+  const addBtn = document.getElementById('crudAddBtn'); if(addBtn) addBtn.onclick = addHandler;
+  const emptyAddBtn = document.getElementById('crudEmptyAddBtn'); if(emptyAddBtn) emptyAddBtn.onclick = addHandler;
+  const exportBtn = document.getElementById('crudExportBtn'); if(exportBtn) exportBtn.onclick = ()=> exportCsv(cfg.exportName, cfg.columns.map(c=>c.label), rows.map(r=>cfg.columns.map(c=>c.csv?c.csv(r):stripHtml(c.render(r)))));
+
+  document.getElementById('crudSearch').addEventListener('input', debounce(e=>{ ui._search=e.target.value; ui._page=0; renderCrudPage(container,cfgIn); },220));
+  (cfg.filters||[]).forEach(f=>{
+    document.getElementById('crudFilter_'+f.key).addEventListener('change', e=>{ ui._filters[f.key]=e.target.value; ui._page=0; renderCrudPage(container,cfgIn); });
+  });
+  const prevBtn=document.getElementById('crudPrev'); if(prevBtn) prevBtn.onclick=()=>{ ui._page--; renderCrudPage(container,cfgIn); };
+  const nextBtn=document.getElementById('crudNext'); if(nextBtn) nextBtn.onclick=()=>{ ui._page++; renderCrudPage(container,cfgIn); };
+
+  container.querySelectorAll('[data-act]').forEach(btn=>{
+    const id = btn.getAttribute('data-id'); const act = btn.getAttribute('data-act');
+    const rec = Entities.get(cfg.collection, id);
+    if(act==='edit') btn.onclick=()=> openEntityForm({ title:cfg.itemName, fields:cfg.formFields, wide:cfg.wide, defaults:cfg.formDefaults,
+      onSave:(vals)=>cfg.onUpdate(id,vals), onDelete:()=>cfg.onDelete(id) }, rec);
+    if(act==='dup') btn.onclick=()=>{ cfg.onDuplicate?cfg.onDuplicate(id):Entities.duplicate(cfg.collection,id); render(); toast(cfg.itemName+' duplicated.'); };
+    if(act==='del') btn.onclick=async ()=>{ const ok=await confirmDialog({title:'Delete '+cfg.itemName+'?', message:'This moves the record to Trash. You can restore it from Settings.', danger:true, okText:'Delete'}); if(ok){ cfg.onDelete(id); render(); toast(cfg.itemName+' deleted.'); } };
+  });
+}
+function stripHtml(s){ return String(s==null?'':s).replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').trim(); }
+
+/* CSV export via downloads capability -------------------------------------*/
+let DOWNLOADS_NS = null;
+async function getDownloads(){
+  if(!window.claude || !window.claude.use) return null;
+  if(DOWNLOADS_NS) return DOWNLOADS_NS;
+  try{ DOWNLOADS_NS = await window.claude.use('downloads'); }catch(e){ DOWNLOADS_NS = null; }
+  return DOWNLOADS_NS;
+}
+/* Standard browser download — used when hosted outside Claude (Netlify, Vercel, etc.) */
+function browserDownload(filename, blob){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.style.display = 'none';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+}
+async function saveFile(filename, blob, okMsg){
+  const dl = await getDownloads();
+  if(!dl){ browserDownload(filename, blob); toast(okMsg); return; }
+  try{
+    const res = await dl.save({filename, data: blob});
+    toast(res.status==='saved' ? okMsg : 'Export ready.');
+  }catch(err){
+    if(err && err.code==='declined'){ return; }
+    // Claude download refused for another reason — fall back to a normal browser download
+    try{ browserDownload(filename, blob); toast(okMsg); }
+    catch(e){ toast('Could not export file: '+(err&&err.message?err.message:'unknown error'),'error'); }
+  }
+}
+function csvEscape(v){ v = v==null?'':String(v); if(/[",\n]/.test(v)) return '"'+v.replace(/"/g,'""')+'"'; return v; }
+function toCsv(headers, rows){ return headers.map(csvEscape).join(',')+'\n'+rows.map(r=>r.map(csvEscape).join(',')).join('\n'); }
+async function exportCsv(filename, headers, rows){
+  const csv = toCsv(headers, rows);
+  const fname = filename.endsWith('.csv')?filename:filename+'.csv';
+  await saveFile(fname, new Blob([csv],{type:'text/csv'}), fname+' saved.');
+}
+async function exportJsonBackup(){
+  const data = JSON.stringify(STATE, null, 2);
+  const fname = 'ad-business-tracker-backup-'+todayStr()+'.json';
+  await saveFile(fname, new Blob([data],{type:'application/json'}), 'Backup saved.');
+}
+
+/* =========================================================================
+   8. CHARTS (hand-built SVG, dataviz categorical palette)
+   ========================================================================= */
+const CHART_CATS = ['#3987e5','#d95926','#199e70','#c98500','#d55181','#3fae3f','#9085e9','#e66767'];
+const CHART_MUTED = '#6f6f6f';
+const CHART_GRID = '#232323';
+const CHART_TEXT2 = '#A7A7A7';
+
+function niceMax(v){ if(v<=0) return 10; const p = Math.pow(10, Math.floor(Math.log10(v))); const n=v/p; let m; if(n<=1)m=1; else if(n<=2)m=2; else if(n<=5)m=5; else m=10; return m*p; }
+
+function mountLineChart(container, series, opts){
+  opts = opts||{};
+  const W = opts.width||680, H = opts.height||260;
+  const padL=52, padR=16, padT=16, padB=30;
+  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const labels = opts.labels||[];
+  if(!labels.length || series.every(s=>s.data.every(v=>!v))){
+    container.innerHTML = '<div class="chart-empty">'+icon('reports','icon-lg')+' &nbsp;Not enough data yet for this chart.</div>';
+    return;
+  }
+  let maxV = 0; series.forEach(s=> s.data.forEach(v=> maxV=Math.max(maxV, v)));
+  maxV = niceMax(maxV*1.15 || 10);
+  const n = labels.length;
+  const xAt = i => padL + (n<=1?innerW/2:(innerW*i/(n-1)));
+  const yAt = v => padT + innerH - (v/maxV)*innerH;
+
+  const gridLines = [0,0.25,0.5,0.75,1].map(t=>{
+    const y = padT+innerH-t*innerH;
+    return '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y+'" y2="'+y+'" stroke="'+CHART_GRID+'" stroke-width="1"/>'+
+      '<text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="10" fill="'+CHART_TEXT2+'" text-anchor="end" font-family="IBM Plex Mono, monospace">'+opts.yFormat(t*maxV)+'</text>';
+  }).join('');
+
+  const step = Math.max(1, Math.ceil(n/7));
+  const xLabels = labels.map((l,i)=> (i%step===0||i===n-1) ? '<text x="'+xAt(i)+'" y="'+(H-8)+'" font-size="10" fill="'+CHART_TEXT2+'" text-anchor="middle">'+l+'</text>' : '').join('');
+
+  const paths = series.map((s,si)=>{
+    const color = s.color||CHART_CATS[si%CHART_CATS.length];
+    const pts = s.data.map((v,i)=> xAt(i)+','+yAt(v));
+    const line = 'M'+pts.join(' L');
+    let area='';
+    if(s.area){
+      area = '<path d="M'+xAt(0)+','+yAt(0)+' L'+pts.join(' L')+' L'+xAt(n-1)+','+yAt(0)+' Z" fill="'+color+'" opacity="0.12"/>';
+    }
+    const dots = s.data.map((v,i)=> '<circle class="pt" data-si="'+si+'" data-i="'+i+'" cx="'+xAt(i)+'" cy="'+yAt(v)+'" r="3" fill="'+color+'" stroke="'+'#111'+'" stroke-width="1.5"/>').join('');
+    return area+'<path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>'+dots;
+  }).join('');
+
+  const svg = '<svg viewBox="0 0 '+W+' '+H+'" style="width:100%; height:auto; display:block; overflow:visible;">'+gridLines+xLabels+paths+
+    '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(padT+innerH)+'" y2="'+(padT+innerH)+'" stroke="#383835" stroke-width="1"/>'+
+    '<rect id="hoverCatcher" x="'+padL+'" y="'+padT+'" width="'+innerW+'" height="'+innerH+'" fill="transparent"/></svg>';
+
+  container.innerHTML = '<div style="position:relative;">'+svg+'</div>';
+  if(series.length>1 || opts.forceLegend){
+    container.innerHTML += '<div class="chart-legend">'+series.map((s,si)=>'<div class="legend-item"><span class="legend-swatch" style="background:'+(s.color||CHART_CATS[si%CHART_CATS.length])+'"></span>'+s.name+'</div>').join('')+'</div>';
+  }
+  const wrap = container.querySelector('div');
+  const catcher = container.querySelector('#hoverCatcher');
+  let tip;
+  catcher.addEventListener('mousemove', e=>{
+    const rect = catcher.getBoundingClientRect();
+    const relX = (e.clientX-rect.left)/rect.width;
+    let idx = Math.round(relX*(n-1)); idx = clamp(idx,0,n-1);
+    if(!tip){ tip = document.createElement('div'); tip.className='chart-tooltip'; wrap.appendChild(tip); }
+    tip.innerHTML = '<div style="font-weight:800; margin-bottom:4px;">'+labels[idx]+'</div>'+
+      series.map((s,si)=>'<div><span style="color:'+(s.color||CHART_CATS[si%CHART_CATS.length])+'">●</span> '+s.name+': <b>'+(opts.yFormat?opts.yFormat(s.data[idx]):s.data[idx])+'</b></div>').join('');
+    const svgRect = wrap.getBoundingClientRect();
+    let left = (xAt(idx)/W)*svgRect.width + 10;
+    if(left + 160 > svgRect.width) left -= 180;
+    tip.style.left = left+'px';
+    tip.style.top = '6px';
+  });
+  catcher.addEventListener('mouseleave', ()=>{ if(tip){ tip.remove(); tip=null; } });
+}
+
+function mountBarChart(container, data, opts){
+  opts = opts||{};
+  data = data.filter(d=>d);
+  if(!data.length){ container.innerHTML = '<div class="chart-empty">'+icon('reports','icon-lg')+' &nbsp;Not enough data yet for this chart.</div>'; return; }
+  const horizontal = opts.horizontal;
+  const maxV = niceMax(Math.max(...data.map(d=>d.value), 0)*1.15 || 10);
+  if(horizontal){
+    const rowH = 30, W=680, padL=Math.min(190, Math.max(100, opts.labelWidth||130)), padR=64, gap=8;
+    const H = data.length*rowH + 10;
+    const innerW = W-padL-padR;
+    const maxChars = Math.max(7, Math.floor((padL-16)/6.4)-2);
+    const bars = data.map((d,i)=>{
+      const y = i*rowH+6;
+      const w = Math.max(2, (d.value/maxV)*innerW);
+      const color = d.color||CHART_CATS[i%CHART_CATS.length];
+      return '<text x="'+(padL-10)+'" y="'+(y+13)+'" font-size="11" fill="'+CHART_TEXT2+'" text-anchor="end">'+truncLabel(d.label,maxChars)+'</text>'+
+        '<rect x="'+padL+'" y="'+y+'" width="'+innerW+'" height="18" rx="4" fill="'+CHART_GRID+'"/>'+
+        '<rect class="bar" data-i="'+i+'" x="'+padL+'" y="'+y+'" width="'+w+'" height="18" rx="4" fill="'+color+'"/>'+
+        '<text x="'+(padL+w+8)+'" y="'+(y+13)+'" font-size="11" fill="var(--text)" font-family="IBM Plex Mono, monospace" font-weight="600">'+(opts.yFormat?opts.yFormat(d.value):d.value)+'</text>';
+    }).join('');
+    container.innerHTML = '<div style="position:relative;"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%; height:auto; display:block;">'+bars+'</svg></div>';
+  } else {
+    const W=680, H=260, padL=52, padR=16, padT=16, padB=34;
+    const innerW=W-padL-padR, innerH=H-padT-padB;
+    const n = data.length;
+    const bw = Math.min(46, innerW/n*0.55);
+    const gridLines = [0,0.25,0.5,0.75,1].map(t=>{ const y=padT+innerH-t*innerH; return '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y+'" y2="'+y+'" stroke="'+CHART_GRID+'"/><text x="'+(padL-8)+'" y="'+(y+4)+'" font-size="10" fill="'+CHART_TEXT2+'" text-anchor="end" font-family="IBM Plex Mono, monospace">'+opts.yFormat(t*maxV)+'</text>'; }).join('');
+    const bars = data.map((d,i)=>{
+      const cx = padL + innerW*(i+0.5)/n;
+      const h = Math.max(1,(d.value/maxV)*innerH);
+      const y = padT+innerH-h;
+      const color = d.color||CHART_CATS[i%CHART_CATS.length];
+      return '<rect class="bar" data-i="'+i+'" x="'+(cx-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="5" fill="'+color+'"/>'+
+        '<text x="'+cx+'" y="'+(H-10)+'" font-size="10" fill="'+CHART_TEXT2+'" text-anchor="middle">'+truncLabel(d.label,9)+'</text>';
+    }).join('');
+    container.innerHTML = '<div style="position:relative;"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%; height:auto; display:block;">'+gridLines+bars+
+      '<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(padT+innerH)+'" y2="'+(padT+innerH)+'" stroke="#383835"/></svg></div>';
+  }
+  const wrap = container.querySelector('div');
+  let tip;
+  container.querySelectorAll('.bar').forEach(barEl=>{
+    barEl.addEventListener('mousemove', e=>{
+      const i = +barEl.getAttribute('data-i'); const d = data[i];
+      if(!tip){ tip=document.createElement('div'); tip.className='chart-tooltip'; wrap.appendChild(tip); }
+      tip.innerHTML = '<b>'+escapeHtml(d.label)+'</b><br>'+(opts.yFormat?opts.yFormat(d.value):d.value);
+      const wrapRect = wrap.getBoundingClientRect();
+      tip.style.left = clamp(e.clientX-wrapRect.left+10, 0, wrapRect.width-160)+'px';
+      tip.style.top = Math.max(0,e.clientY-wrapRect.top-40)+'px';
+    });
+    barEl.addEventListener('mouseleave', ()=>{ if(tip){ tip.remove(); tip=null; } });
+  });
+}
+function truncLabel(s,n){ s=String(s); return s.length>n? s.slice(0,n-1)+'…' : s; }
+
+function monthsBack(k){
+  const arr=[]; const t=new Date();
+  for(let i=k-1;i>=0;i--){ const d=new Date(t.getFullYear(), t.getMonth()-i, 1); arr.push(d.getFullYear()+'-'+pad2(d.getMonth()+1)); }
+  return arr;
+}
+
+/* =========================================================================
+   9. SELECT OPTION HELPERS
+   ========================================================================= */
+function optClients(){ return Entities.list('clients').map(c=>({value:c.id,label:c.name})); }
+function optOffers(){ return Entities.list('offers').filter(o=>o.status!=='Archived').map(o=>({value:o.id,label:o.name})); }
+function optAccounts(){ return Entities.list('cashAccounts').map(a=>({value:a.id,label:a.name+' ('+a.type+')'})); }
+function optExpenseCats(includeAuto){ return Entities.list('expenseCategories').filter(c=>includeAuto||!c.autoOnly).map(c=>({value:c.id,label:c.name})); }
+function optCampaigns(){ return Entities.list('campaigns').map(c=>({value:c.id,label:c.campaignName})); }
+function optMembers(){ return Entities.list('teamMembers').map(m=>({value:m.id,label:m.name})); }
+function optOfferCategories(type){ const s=Settings(); return (s.offerCategories[type]||[]).map(c=>({value:c,label:c})); }
+
+/* =========================================================================
+   10. FIELD SCHEMAS
+   ========================================================================= */
+function offerFields(){
+  return [
+    {key:'name', label:'Offer Name', type:'text', required:true, span2:true},
+    {key:'type', label:'Type', type:'select', required:true, options:['Service','Digital Product']},
+    {key:'category', label:'Category', type:'select', required:true, options:v=>optOfferCategories(v.type||'Service')},
+    {key:'regularPrice', label:'Regular Price', type:'currency'},
+    {key:'promoPrice', label:'Promo Price', type:'currency', hint:'Used as the default selling price on new sales.'},
+    {key:'fulfillmentCost', label:'Estimated Fulfillment Cost', type:'currency'},
+    {key:'adAllocation', label:'Advertising Allocation', type:'currency'},
+    {key:'paymentFeePct', label:'Payment Fee %', type:'number', hint:'Applied automatically when this offer is sold.'},
+    {key:'status', label:'Status', type:'select', options:['Active','Inactive','Archived'], default:'Active'},
+  ];
+}
+function saleFields(){
+  return [
+    {key:'date', label:'Date', type:'date', required:true, default:todayStr()},
+    {key:'clientId', label:'Client', type:'select', required:true, options:optClients, placeholder:'Select client'},
+    {key:'offerId', label:'Offer', type:'select', required:true, options:optOffers, placeholder:'Select offer',
+      onChange:(v)=>{ const o=offerOf(v.offerId); if(o){ v.type=o.type; v.category=o.category; if(!v._priceTouched) v.price=o.promoPrice||o.regularPrice; if(!v._costTouched) v.directCost=o.fulfillmentCost; if(!v._feeTouched) v.paymentFee=round0((v.price||0)*(v.qty||1)*(o.paymentFeePct/100)); } }},
+    {key:'type', label:'Type', type:'select', options:['Service','Digital Product'], readonly:true},
+    {key:'qty', label:'Quantity', type:'number', default:1, min:1},
+    {key:'price', label:'Selling Price', type:'currency', required:true},
+    {key:'discount', label:'Discount', type:'currency', default:0},
+    {key:'directCost', label:'Direct / Fulfillment Cost', type:'currency', default:0},
+    {key:'paymentFee', label:'Payment Fee', type:'currency', default:0},
+    {key:'amountPaid', label:'Amount Paid', type:'currency', default:0, hint:'Leave 0 for an unpaid/pending sale.'},
+    {key:'refund', label:'Refund Amount', type:'currency', default:0},
+    {key:'refundDate', label:'Refund Date', type:'date', showIf:v=>safeNum(v.refund)>0, default:todayStr()},
+    {key:'account', label:'Deposit To Account', type:'select', required:true, options:optAccounts, placeholder:'Select account'},
+    {key:'campaignId', label:'Attributed Campaign (optional)', type:'select', options:()=>[{value:'',label:'— None —'}].concat(optCampaigns())},
+    {key:'paymentMethod', label:'Payment Method', type:'select', options:()=>Settings().paymentMethods},
+    {key:'dueDate', label:'Due Date', type:'date'},
+    {key:'reimbursable', label:'Client pass-through (excludes from revenue)', type:'checkbox', span2:true},
+    {key:'notes', label:'Notes', type:'textarea', span2:true},
+  ];
+}
+function expenseFields(){
+  return [
+    {key:'date', label:'Date', type:'date', required:true, default:todayStr()},
+    {key:'name', label:'Expense Name', type:'text', required:true, span2:true},
+    {key:'categoryId', label:'Category', type:'select', required:true, options:()=>optExpenseCats(false), placeholder:'Select category'},
+    {key:'vendor', label:'Vendor', type:'text'},
+    {key:'amount', label:'Amount', type:'currency', required:true},
+    {key:'account', label:'Payment Account', type:'select', required:true, options:optAccounts, placeholder:'Select account'},
+    {key:'recurring', label:'Recurring expense', type:'checkbox'},
+    {key:'frequency', label:'Frequency', type:'select', options:['Weekly','Monthly','Quarterly','Yearly'], showIf:v=>v.recurring},
+    {key:'receiptRef', label:'Receipt / Reference', type:'text'},
+    {key:'tag', label:'Tag', type:'select', options:['Business','Personal'], default:'Business'},
+    {key:'reimbursable', label:'Client pass-through (excludes from P&L)', type:'checkbox', span2:true},
+    {key:'notes', label:'Notes', type:'textarea', span2:true},
+  ];
+}
+function clientFields(){
+  return [
+    {key:'name', label:'Client Name', type:'text', required:true, span2:true},
+    {key:'company', label:'Business / Company', type:'text'},
+    {key:'accountManager', label:'Account Manager', type:'text'},
+    {key:'phone', label:'Contact Number', type:'text'},
+    {key:'email', label:'Email', type:'text'},
+    {key:'projectStatus', label:'Project Status', type:'select', options:['New Lead','Confirmed','Waiting for Payment','In Production','For Review','Revision','Completed','Cancelled'], default:'New Lead'},
+    {key:'startDate', label:'Start Date', type:'date', default:todayStr()},
+    {key:'deadline', label:'Deadline', type:'date'},
+    {key:'notes', label:'Notes', type:'textarea', span2:true},
+  ];
+}
+function campaignFields(){
+  return [
+    {key:'date', label:'Date', type:'date', required:true, default:todayStr()},
+    {key:'platform', label:'Platform', type:'select', required:true, options:['Meta Ads','TikTok Ads','Google Ads','Other']},
+    {key:'campaignName', label:'Campaign Name', type:'text', required:true, span2:true},
+    {key:'offerId', label:'Offer', type:'select', options:()=>[{value:'',label:'— None —'}].concat(optOffers())},
+    {key:'adSpend', label:'Ad Spend', type:'currency', required:true},
+    {key:'messages', label:'Messages / Leads', type:'number', default:0},
+    {key:'purchases', label:'Purchases', type:'number', default:0},
+    {key:'revenueGenerated', label:'Revenue Generated (attributed estimate)', type:'currency', default:0},
+    {key:'account', label:'Paid From Account', type:'select', required:true, options:optAccounts},
+  ];
+}
+function memberFields(){
+  return [
+    {key:'name', label:'Name', type:'text', required:true},
+    {key:'role', label:'Role', type:'select', options:()=>Settings().teamRoles},
+    {key:'paymentType', label:'Payment Type', type:'select', options:['Monthly Salary','Per Project','Per Output','Commission'], default:'Monthly Salary'},
+    {key:'monthlySalary', label:'Monthly Salary', type:'currency', showIf:v=>v.paymentType==='Monthly Salary'},
+    {key:'perProjectRate', label:'Per Project Rate', type:'currency', showIf:v=>v.paymentType==='Per Project'},
+    {key:'perOutputRate', label:'Per Output Rate', type:'currency', showIf:v=>v.paymentType==='Per Output'},
+    {key:'commissionPct', label:'Commission %', type:'number', showIf:v=>v.paymentType==='Commission'},
+    {key:'nextPayment', label:'Next Payment Date', type:'date'},
+    {key:'status', label:'Status', type:'select', options:['Active','Inactive'], default:'Active'},
+  ];
+}
+function payrollFields(){
+  return [
+    {key:'teamMemberId', label:'Team Member', type:'select', required:true, options:optMembers, placeholder:'Select member'},
+    {key:'date', label:'Date', type:'date', required:true, default:todayStr()},
+    {key:'amount', label:'Amount', type:'currency', required:true},
+    {key:'type', label:'Type', type:'select', options:['Salary','Bonus','Commission','Project','Output']},
+    {key:'account', label:'Paid From Account', type:'select', required:true, options:optAccounts},
+    {key:'notes', label:'Notes', type:'textarea', span2:true},
+  ];
+}
+function accountFields(){
+  return [
+    {key:'name', label:'Account Name', type:'text', required:true},
+    {key:'type', label:'Account Type', type:'select', options:['GCash','Maya','Bank','PayPal','Wise','Cash','Other']},
+    {key:'openingBalance', label:'Opening Balance', type:'currency', default:0},
+    {key:'currency', label:'Currency', type:'select', options:['PHP','USD','GBP','EUR'], default:'PHP'},
+    {key:'fxRateToPHP', label:'FX Rate to PHP (reference only)', type:'number', default:1, showIf:v=>v.currency && v.currency!=='PHP', hint:'For your own reference. Enter the Opening Balance above already converted to '+Settings().currencyCode+' — all activity is tracked in one currency.'},
+  ];
+}
+function accountTxnFields(){
+  return [
+    {key:'date', label:'Date', type:'date', required:true, default:todayStr()},
+    {key:'type', label:'Type', type:'select', required:true, options:['Transfer','Capital In',"Owner's Draw",'Loan In','Loan Out','Opening Adjustment']},
+    {key:'fromAccount', label:'From Account', type:'select', options:()=>[{value:'',label:'—'}].concat(optAccounts()), showIf:v=>['Transfer',"Owner's Draw",'Loan Out'].includes(v.type)},
+    {key:'toAccount', label:'To Account', type:'select', options:()=>[{value:'',label:'—'}].concat(optAccounts()), showIf:v=>['Transfer','Capital In','Loan In'].includes(v.type)},
+    {key:'amount', label:'Amount', type:'currency', required:true},
+    {key:'notes', label:'Notes', type:'textarea', span2:true},
+  ];
+}
+
+/* =========================================================================
+   11. NAVIGATION / ROUTER
+   ========================================================================= */
+const NAV = [
+  {key:'dashboard', label:'Dashboard', icon:'dashboard'},
+  {key:'sales', label:'Sales', icon:'sales'},
+  {key:'transactions', label:'Transactions', icon:'transactions'},
+  {key:'services', label:'Services & Products', icon:'services'},
+  {key:'clients', label:'Clients', icon:'clients'},
+  {key:'receivables', label:'Receivables', icon:'receivables'},
+  {key:'expenses', label:'Expenses', icon:'expenses'},
+  {key:'advertising', label:'Advertising', icon:'advertising'},
+  {key:'team', label:'Team & Payroll', icon:'team'},
+  {key:'cash', label:'Cash Accounts', icon:'cash'},
+  {key:'targets', label:'Targets', icon:'targets'},
+  {key:'reports', label:'Reports', icon:'reports'},
+  {key:'alerts', label:'Alerts', icon:'alerts'},
+  {key:'settings', label:'Settings', icon:'settings'},
+];
+
+function goTo(route){ APP.route = route; APP.mobileOpen=false; render(); window.scrollTo(0,0); }
+
+function renderSidebar(){
+  const nav = document.getElementById('navlist');
+  const alertCount = computeAlerts().filter(a=>a.severity!=='GOOD').length;
+  nav.innerHTML = NAV.map(item=>{
+    const badge = item.key==='alerts' && alertCount ? '<span class="nav-badge">'+alertCount+'</span>' : '';
+    return '<div class="nav-item '+(APP.route===item.key?'active':'')+'" data-route="'+item.key+'">'+icon(item.icon)+'<span class="label">'+item.label+'</span>'+badge+'</div>';
+  }).join('');
+  nav.querySelectorAll('.nav-item').forEach(el=> el.onclick = ()=> goTo(el.getAttribute('data-route')));
+  document.getElementById('sidebarFoot').innerHTML = '<div style="display:flex; align-items:center; gap:8px;">'+icon('building','icon-sm')+' '+escapeHtml(Settings().businessName)+'</div>';
+  document.getElementById('sidebar').classList.toggle('collapsed', APP.sidebarCollapsed);
+  document.getElementById('sidebar').classList.toggle('mobile-open', APP.mobileOpen);
+  const collapseBtn = document.getElementById('sidebarCollapseBtn');
+  collapseBtn.innerHTML = icon(APP.sidebarCollapsed?'chevronRight':'chevronDown','icon-sm');
+}
+
+function renderTopbar(){
+  const hour = new Date().getHours();
+  const greet = hour<12?'Good morning':(hour<18?'Good afternoon':'Good evening');
+  document.getElementById('greetingText').textContent = greet+', '+(Settings().ownerName||'Boss');
+  const pageDef = NAV.find(n=>n.key===APP.route);
+  document.getElementById('greetingSub').textContent = APP.route==='dashboard' ? "Here's how your business is performing." : (pageDef?pageDef.label:'');
+  document.getElementById('globalSearchBtn').innerHTML = icon('search')+' <span style="color:var(--text2)">Search…</span>';
+
+  const showRange = ['dashboard'].includes(APP.route);
+  const drc = document.getElementById('dateRangeControl');
+  if(showRange){
+    drc.style.display='';
+    drc.innerHTML = '<select class="select" id="rangePreset" style="width:auto;">'+RANGE_PRESETS.map(p=>'<option value="'+p+'" '+(APP.range.preset===p?'selected':'')+'>'+p+'</option>').join('')+'</select>'+
+      (APP.range.preset==='Custom Range' ? '<div style="display:inline-flex; gap:6px; margin-left:6px;"><input type="date" class="input" id="rangeStart" style="width:auto;" value="'+APP.range.start+'"><input type="date" class="input" id="rangeEnd" style="width:auto;" value="'+APP.range.end+'"></div>' : '');
+    document.getElementById('rangePreset').onchange = e=>{
+      const val = e.target.value;
+      APP.range = resolveRange(val, val==='Custom Range'?{start:APP.range.start,end:APP.range.end}:null);
+      render();
+    };
+    const rs=document.getElementById('rangeStart'), re=document.getElementById('rangeEnd');
+    if(rs) rs.onchange = e=>{ APP.range = resolveRange('Custom Range', {start:e.target.value, end:APP.range.end}); render(); };
+    if(re) re.onchange = e=>{ APP.range = resolveRange('Custom Range', {start:APP.range.start, end:e.target.value}); render(); };
+  } else {
+    drc.style.display='none';
+    drc.innerHTML='';
+  }
+}
+
+const PAGE_RENDERERS = {
+  dashboard: renderDashboardPage,
+  sales: renderSalesPage,
+  transactions: renderTransactionsPage,
+  services: renderServicesPage,
+  clients: renderClientsPage,
+  receivables: renderReceivablesPage,
+  expenses: renderExpensesPage,
+  advertising: renderAdvertisingPage,
+  team: renderTeamPage,
+  cash: renderCashPage,
+  targets: renderTargetsPage,
+  reports: renderReportsPage,
+  alerts: renderAlertsPage,
+  settings: renderSettingsPage,
+};
+
+/* =========================================================================
+   12. DASHBOARD
+   ========================================================================= */
+function kpiCardHtml(label, value, delta, tip){
+  return '<div class="card kpi"><div class="k-label">'+escapeHtml(label)+(tip?' <span class="k-tip" title="'+escapeHtml(tip)+'">'+icon('info','icon-sm')+'</span>':'')+'</div>'+
+    '<div class="k-value num">'+value+'</div>'+
+    (delta?'<div class="k-delta '+delta.cls+'">'+icon(delta.cls==='up'?'arrowUp':(delta.cls==='down'?'arrowDown':'minus'),'icon-sm')+delta.text+'</div>':'')+
+    '</div>';
+}
+function renderDashboardPage(container){
+  const range = APP.range;
+  const p = Calc_period(range);
+  const prevRange = previousEquivalent(range);
+  const pp = Calc_period(prevRange);
+  const receivables = Calc_outstandingReceivables();
+  const outstandingTotal = receivables.reduce((a,s)=>a+Calc_saleBalance(s),0);
+  const prevReceivables = Calc_outstandingReceivables().length; // structural, not period based
+
+  let html = '<div class="page-head"><div><h2>Overview</h2><p class="sub">'+rangeDisplay(range)+'</p></div></div>';
+
+  html += '<div class="grid kpi-grid" style="margin-bottom:14px;">'+
+    kpiCardHtml('Total Revenue', fmtMoney(p.netRevenue), pctChangeLabel(p.netRevenue,pp.netRevenue), 'Net Revenue = Gross Sales − Refunds, for the selected period.')+
+    kpiCardHtml('Total Expenses', fmtMoney(p.totalExpenses), pctChangeLabel(p.totalExpenses,pp.totalExpenses), 'Direct costs + payment fees + operating expenses + ad spend + payroll.')+
+    kpiCardHtml('Net Profit', fmtMoney(p.netProfit), pctChangeLabel(p.netProfit,pp.netProfit), 'Net Revenue minus every cost: direct, operating, advertising and payroll.')+
+    kpiCardHtml('Net Profit Margin', fmtPct(p.netMargin), pctChangeLabel(p.netMargin,pp.netMargin), 'Net Profit ÷ Net Revenue.')+
+    '</div>';
+  html += '<div class="grid kpi-grid" style="margin-bottom:20px;">'+
+    kpiCardHtml('Ad Spend', fmtMoney(p.adSpend), pctChangeLabel(p.adSpend,pp.adSpend), 'Total spend logged in Advertising for this period.')+
+    kpiCardHtml('Blended ROAS', (p.roasBlended?p.roasBlended.toFixed(2):'0.00')+'x', pctChangeLabel(p.roasBlended,pp.roasBlended), 'Net Revenue ÷ Ad Spend — your whole business, not just attributed sales.')+
+    kpiCardHtml('Total Sales', fmtNum(p.sales.length,0), pctChangeLabel(p.sales.length,pp.sales.length), 'Number of sale transactions recorded in this period.')+
+    kpiCardHtml('Outstanding Receivables', fmtMoney(outstandingTotal), null, 'Total unpaid balance across all clients, as of today (not period-bound).')+
+    '</div>';
+
+  html += '<div class="grid" style="grid-template-columns:2fr 1fr; margin-bottom:14px;" id="dashTopGrid">'+
+    '<div class="card"><div class="card-head"><h3>Revenue vs Expenses vs Net Profit</h3><span class="sub">Last 6 months</span></div><div id="mainTrendChart"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Revenue Target</h3><span class="sub">'+fmtMonthLabel(monthKey(todayStr()))+'</span></div><div id="dashTargetProgress"></div></div>'+
+    '</div>';
+
+  html += '<div class="grid grid-3" style="margin-bottom:14px;">'+
+    '<div class="card"><div class="card-head"><h3>Revenue by Offer</h3></div><div id="dashRevByOffer"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Expense Breakdown</h3></div><div id="dashExpBreakdown"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Advertising Performance</h3></div><div id="dashAdPerf"></div></div>'+
+    '</div>';
+
+  html += '<div class="grid" style="grid-template-columns:1.6fr 1fr;">'+
+    '<div class="card"><div class="card-head"><h3>Recent Transactions</h3><a class="btn btn-sm" data-goto="transactions">View all</a></div><div id="dashRecentTxn"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Outstanding Client Balances</h3><a class="btn btn-sm" data-goto="receivables">View all</a></div><div id="dashOutstanding"></div></div>'+
+    '</div>';
+  html += '<div class="card" style="margin-top:14px;"><div class="card-head"><h3>Business Alerts</h3><a class="btn btn-sm" data-goto="alerts">View all</a></div><div id="dashAlerts"></div></div>';
+
+  container.innerHTML = html;
+  container.querySelectorAll('[data-goto]').forEach(el=> el.onclick=()=>goTo(el.getAttribute('data-goto')));
+
+  // main trend chart: last 6 months
+  const months = monthsBack(6);
+  const revSeries=[], expSeries=[], profitSeries=[];
+  months.forEach(mk=>{
+    const r = resolveRange('Custom Range', {start:mk+'-01', end: mk===monthKey(todayStr())?todayStr():toDateStr(new Date(+mk.slice(0,4), +mk.slice(5,7),0))});
+    const pm = Calc_period(r);
+    revSeries.push(round0(pm.netRevenue)); expSeries.push(round0(pm.totalExpenses)); profitSeries.push(round0(pm.netProfit));
+  });
+  mountLineChart(document.getElementById('mainTrendChart'), [
+    {name:'Revenue', data:revSeries, color:'#3987e5', area:true},
+    {name:'Expenses', data:expSeries, color:'#e66767'},
+    {name:'Net Profit', data:profitSeries, color:'#FFD400'},
+  ], {labels:months.map(fmtMonthLabel), yFormat:v=>fmtMoney(v)});
+
+  // target progress
+  const tgt = Entities.list('targets').find(t=>t.month===monthKey(todayStr()));
+  const tEl = document.getElementById('dashTargetProgress');
+  if(!tgt){
+    tEl.innerHTML = '<div class="empty-state" style="padding:24px 8px;">'+icon('targets','icon-lg')+'<h4 style="font-size:13px;">No target set</h4><p>Set a monthly revenue goal in Targets.</p><button class="btn btn-primary btn-sm" id="goSetTarget">Set Target</button></div>';
+    document.getElementById('goSetTarget').onclick=()=>goTo('targets');
+  } else {
+    const mRange = resolveRange('This Month');
+    const mp = Calc_period(mRange);
+    const pct = clamp(safeDiv(mp.netRevenue, tgt.revenueGoal),0,1.4);
+    const daysInMonth = new Date(+mRange.start.slice(0,4), +mRange.start.slice(5,7), 0).getDate();
+    const daysRemaining = Math.max(0, daysInMonth - (new Date().getDate()));
+    const remaining = Math.max(0, tgt.revenueGoal - mp.netRevenue);
+    const requiredDaily = daysRemaining>0 ? remaining/daysRemaining : 0;
+    tEl.innerHTML = '<div class="mini-stat" style="margin-bottom:10px;"><span class="lbl">Goal</span><span class="val num">'+fmtMoney(tgt.revenueGoal)+'</span></div>'+
+      '<div class="progress-track" style="margin-bottom:8px;"><div class="progress-fill '+(pct<0.5?'danger':pct<0.85?'warning':'')+'" style="width:'+(pct*100)+'%"></div></div>'+
+      '<div style="display:flex; justify-content:space-between; font-size:11.5px; color:var(--text2); margin-bottom:14px;"><span>'+fmtPct(pct)+' achieved</span><span>'+fmtMoney(mp.netRevenue)+' of '+fmtMoney(tgt.revenueGoal)+'</span></div>'+
+      '<div class="grid grid-2" style="gap:10px;">'+
+      '<div class="mini-stat"><span class="lbl">Remaining</span><span class="val num" style="font-size:14px;">'+fmtMoney(remaining)+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Days Left</span><span class="val num" style="font-size:14px;">'+daysRemaining+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Required Daily</span><span class="val num" style="font-size:14px;">'+fmtMoney(requiredDaily)+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Projected Month-End</span><span class="val num" style="font-size:14px;">'+fmtMoney(new Date().getDate()>0? (mp.netRevenue/new Date().getDate())*daysInMonth : 0)+'</span></div>'+
+      '</div>';
+  }
+
+  // revenue by offer
+  const offerRev = {};
+  p.sales.forEach(s=>{ const o=offerOf(s.offerId); const key=o?o.name:'Unknown'; offerRev[key]=(offerRev[key]||0)+Calc_saleNet(s); });
+  const offerData = Object.keys(offerRev).map(k=>({label:k, value:offerRev[k]})).sort((a,b)=>b.value-a.value).slice(0,6);
+  mountBarChart(document.getElementById('dashRevByOffer'), offerData, {horizontal:true, yFormat:fmtMoney});
+
+  // expense breakdown
+  const expByCat = {};
+  p.lines.forEach(l=>{ expByCat[l.categoryName]=(expByCat[l.categoryName]||0)+l.amount; });
+  const expData = Object.keys(expByCat).map((k,i)=>({label:k, value:expByCat[k]})).sort((a,b)=>b.value-a.value).slice(0,6);
+  mountBarChart(document.getElementById('dashExpBreakdown'), expData, {horizontal:true, yFormat:fmtMoney});
+
+  // ad performance mini stats
+  document.getElementById('dashAdPerf').innerHTML =
+    '<div class="list-plain">'+
+    listRow('Total Ad Spend', fmtMoney(p.adSpend))+
+    listRow('Total Messages', fmtNum(p.totalMessages,0))+
+    listRow('Avg. Cost / Message', fmtMoney(p.cpm))+
+    listRow('Total Purchases', fmtNum(p.totalPurchases,0))+
+    listRow('Avg. Cost / Purchase', fmtMoney(p.cpp))+
+    listRow('Attributed ROAS', (p.roasAttributed||0).toFixed(2)+'x')+
+    '</div>';
+
+  // recent transactions
+  const recent = getAllExpenseLines().map(l=>({date:l.date,label:l.name,amount:-l.amount,type:l.categoryName}))
+    .concat(Entities.list('sales').map(s=>({date:s.date, label:(clientOf(s.clientId)||{}).name||'Sale', amount:Calc_saleNet(s), type:'Sale'})))
+    .sort((a,b)=> b.date.localeCompare(a.date)).slice(0,8);
+  document.getElementById('dashRecentTxn').innerHTML = recent.length ? '<div class="list-plain">'+recent.map(t=>
+    '<div class="list-row"><div style="display:flex;align-items:center;gap:10px;"><div class="avatar">'+icon(t.amount>=0?'arrowUp':'arrowDown','icon-sm')+'</div><div><div style="font-weight:700; font-size:12.6px;">'+escapeHtml(t.label)+'</div><div class="cell-muted" style="font-size:11px;">'+t.type+' · '+fmtDateShort(t.date)+'</div></div></div>'+
+    '<div class="num" style="font-weight:800; color:'+(t.amount>=0?'var(--success)':'var(--text)')+'">'+(t.amount>=0?'+':'')+fmtMoney(t.amount)+'</div></div>').join('')+'</div>'
+    : emptyInline('No transactions yet.', 'Record your first sale or expense to see it here.');
+
+  // outstanding balances
+  const topOutstanding = receivables.map(s=>({client:clientOf(s.clientId), bal:Calc_saleBalance(s), s}))
+    .sort((a,b)=>b.bal-a.bal).slice(0,6);
+  document.getElementById('dashOutstanding').innerHTML = topOutstanding.length ? '<div class="list-plain">'+topOutstanding.map(r=>
+    '<div class="list-row"><div style="display:flex;align-items:center;gap:10px;"><div class="avatar">'+initials(r.client?r.client.name:'?')+'</div><div><div style="font-weight:700; font-size:12.6px;">'+escapeHtml(r.client?r.client.name:'Unknown client')+'</div><div class="cell-muted" style="font-size:11px;">Due '+fmtDateShort(r.s.dueDate)+'</div></div></div>'+
+    '<div class="num" style="font-weight:800;">'+fmtMoney(r.bal)+'</div></div>').join('')+'</div>'
+    : emptyInline('No outstanding balances.', 'All client payments are up to date.');
+
+  // alerts
+  const alerts = computeAlerts().slice(0,5);
+  document.getElementById('dashAlerts').innerHTML = alerts.length ? alerts.map(a=>alertRowHtml(a)).join('') : emptyInline('No alerts right now.', 'You\'ll see budget, ROAS and payment alerts here.');
+  document.getElementById('dashAlerts').querySelectorAll('.alert-row').forEach(el=>el.onclick=()=>{ const a=alerts.find(x=>x.key===el.getAttribute('data-key')); if(a&&a.goto) goTo(a.goto); });
+}
+function listRow(label,value){ return '<div class="list-row"><span class="cell-muted" style="font-size:12.4px;">'+label+'</span><span class="num" style="font-weight:700;">'+value+'</span></div>'; }
+function emptyInline(title,desc){ return '<div class="empty-state" style="padding:30px 10px;">'+icon('info','icon-lg')+'<h4 style="font-size:13px;">'+title+'</h4><p>'+desc+'</p></div>'; }
+
+/* =========================================================================
+   13. SALES PAGE
+   ========================================================================= */
+function statusBadge(status){
+  const map = {Paid:'success', Partial:'warning', Pending:'neutral', Overdue:'danger', Active:'success', Inactive:'neutral', Archived:'neutral',
+    'New Lead':'info','Confirmed':'info','Waiting for Payment':'warning','In Production':'info','For Review':'warning','Revision':'warning','Completed':'success','Cancelled':'danger'};
+  return '<span class="badge badge-'+(map[status]||'neutral')+'">'+escapeHtml(status)+'</span>';
+}
+function renderSalesPage(container){
+  renderCrudPage(container, {
+    stateKey:'sales', collection:'sales', title:'Sales', subtitle:'Every transaction across your services and digital products.',
+    itemName:'Sale', icon:'sales', wide:true, exportName:'sales', dateKey:'date',
+    emptyTitle:'No sales recorded yet.', emptyDesc:'Add your first sale to start tracking revenue.', emptyCta:'Add Sale',
+    formFields:saleFields(), formDefaults:()=>({date:todayStr(), qty:1, discount:0, refund:0, amountPaid:0, paymentStatus:'Pending'}),
+    searchText:r=>{ const c=clientOf(r.clientId), o=offerOf(r.offerId); return (c?c.name:'')+' '+(o?o.name:'')+' '+r.notes; },
+    filters:[
+      {key:'type', label:'Type', options:['Service','Digital Product'], match:(r,v)=>r.type===v},
+      {key:'status', label:'Status', options:['Paid','Partial','Pending','Overdue'], match:(r,v)=>Calc_saleStatus(r)===v},
+    ],
+    defaultSort:(a,b)=> b.date.localeCompare(a.date),
+    columns:[
+      {label:'Date', render:r=>fmtDateShort(r.date)},
+      {label:'Client', render:r=>escapeHtml((clientOf(r.clientId)||{}).name||'—')},
+      {label:'Offer', render:r=>escapeHtml((offerOf(r.offerId)||{}).name||'—')},
+      {label:'Type', render:r=>r.type||''},
+      {label:'Qty', render:r=>r.qty, cls:'cell-num'},
+      {label:'Gross', render:r=>'<span class="cell-num">'+fmtMoney(Calc_saleGross(r))+'</span>'},
+      {label:'Net Revenue', render:r=>'<span class="cell-num cell-strong">'+fmtMoney(Calc_saleNet(r))+'</span>'},
+      {label:'Profit', render:r=>'<span class="cell-num" style="color:'+(Calc_saleProfit(r)>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(Calc_saleProfit(r))+'</span>'},
+      {label:'Status', render:r=>statusBadge(Calc_saleStatus(r))},
+    ],
+    rowActions:['edit','duplicate','delete'],
+    onCreate:v=>Entities.create('sales', v),
+    onUpdate:(id,v)=>Entities.update('sales', id, v),
+    onDelete:id=>Entities.softDelete('sales', id),
+  });
+}
+
+/* =========================================================================
+   14. MASTER TRANSACTIONS PAGE (read view over every ledger source)
+   ========================================================================= */
+function getMasterTransactions(){
+  const rows = [];
+  Entities.list('sales').forEach(s=>{
+    const c = clientOf(s.clientId);
+    rows.push({id:'sale_'+s.id, date:s.date, kind:'Income', desc:(c?c.name:'Sale')+' — '+((offerOf(s.offerId)||{}).name||''), amount:Calc_saleNet(s), account:accountOf(s.account)});
+    if(s.refund>0) rows.push({id:'refund_'+s.id, date:s.refundDate||s.date, kind:'Refund', desc:'Refund — '+(c?c.name:'Sale'), amount:-s.refund, account:accountOf(s.account)});
+  });
+  getAllExpenseLines().forEach(l=>{
+    const kind = l.costType==='advertising'?'Advertising':(l.costType==='payroll'?'Payroll':'Expense');
+    rows.push({id:l.id, date:l.date, kind, desc:l.name, amount:-l.amount, account:accountOf(l.account)});
+  });
+  Entities.list('accountTransactions').forEach(t=>{
+    rows.push({id:'txn_'+t.id, date:t.date, kind:'Transfer / '+t.type, desc:t.notes||t.type, amount:t.amount, account:accountOf(t.toAccount||t.fromAccount)});
+  });
+  return rows.sort((a,b)=>b.date.localeCompare(a.date));
+}
+function renderTransactionsPage(container){
+  let ui = CRUD_UI['txnPage'] = CRUD_UI['txnPage']||{search:'',kind:''};
+  let rows = getMasterTransactions();
+  if(ui.search){ const q=ui.search.toLowerCase(); rows = rows.filter(r=>r.desc.toLowerCase().includes(q)); }
+  if(ui.kind) rows = rows.filter(r=>r.kind===ui.kind);
+  const kinds = Array.from(new Set(getMasterTransactions().map(r=>r.kind)));
+  let html = '<div class="page-head"><div><h2>Transaction History</h2><p class="sub">Every income, expense, advertising, payroll and transfer record in one place.</p></div>'+
+    '<div class="toolbar"><button class="btn" id="txnExportBtn">'+icon('download')+' Export CSV</button></div></div>';
+  html += '<div class="filter-bar"><div class="search-input-wrap">'+icon('search')+'<input class="input" id="txnSearch" placeholder="Search transactions…" value="'+escapeHtml(ui.search)+'"></div>'+
+    '<select class="select" id="txnKindFilter" style="width:auto;"><option value="">Type (All)</option>'+kinds.map(k=>'<option value="'+k+'" '+(ui.kind===k?'selected':'')+'>'+k+'</option>').join('')+'</select></div>';
+  if(!rows.length){
+    html += '<div class="card"><div class="empty-state">'+icon('transactions','icon-lg')+'<h4>No transactions yet.</h4><p>Sales, expenses, ads and payroll will all show up here automatically.</p></div></div>';
+  } else {
+    html += '<div class="table-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Account</th><th>Amount</th></tr></thead><tbody>'+
+      rows.slice(0,300).map(r=>'<tr><td>'+fmtDateShort(r.date)+'</td><td>'+badgeForKind(r.kind)+'</td><td>'+escapeHtml(r.desc)+'</td><td class="cell-muted">'+(r.account?escapeHtml(r.account.name):'—')+'</td>'+
+        '<td class="cell-num" style="color:'+(r.amount>=0?'var(--success)':'var(--text)')+'; font-weight:700;">'+(r.amount>=0?'+':'')+fmtMoney(r.amount)+'</td></tr>').join('')+
+      '</tbody></table></div>';
+    if(rows.length>300) html += '<p class="sub" style="margin-top:10px;">Showing the most recent 300 of '+rows.length+' transactions. Export CSV for the full history.</p>';
+  }
+  container.innerHTML = html;
+  document.getElementById('txnSearch').addEventListener('input', debounce(e=>{ ui.search=e.target.value; renderTransactionsPage(container); },220));
+  document.getElementById('txnKindFilter').addEventListener('change', e=>{ ui.kind=e.target.value; renderTransactionsPage(container); });
+  document.getElementById('txnExportBtn').onclick = ()=> exportCsv('transactions', ['Date','Type','Description','Account','Amount'], rows.map(r=>[r.date,r.kind,r.desc,r.account?r.account.name:'',r.amount]));
+}
+function badgeForKind(k){
+  const map={Income:'success', Refund:'danger', Advertising:'info', Payroll:'warning', Expense:'neutral'};
+  let key = k.startsWith('Transfer')?'neutral':(map[k]||'neutral');
+  return '<span class="badge badge-'+key+'">'+escapeHtml(k)+'</span>';
+}
+
+/* =========================================================================
+   15. SERVICES & PRODUCTS PAGE
+   ========================================================================= */
+function renderServicesPage(container){
+  renderCrudPage(container, {
+    stateKey:'offers', collection:'offers', title:'Services & Digital Products', subtitle:'Manage every offer you sell and its target profitability.',
+    itemName:'Offer', icon:'services', exportName:'offers',
+    emptyTitle:'No offers yet.', emptyDesc:'Add a service or digital product to start recording sales against it.', emptyCta:'Add Offer',
+    formFields:offerFields(), formDefaults:()=>({type:'Service', status:'Active', paymentFeePct:0}),
+    searchText:r=>r.name+' '+r.category,
+    filters:[
+      {key:'type', label:'Type', options:['Service','Digital Product'], match:(r,v)=>r.type===v},
+      {key:'status', label:'Status', options:['Active','Inactive','Archived'], match:(r,v)=>r.status===v},
+    ],
+    defaultSort:(a,b)=>a.name.localeCompare(b.name),
+    columns:[
+      {label:'Offer', render:r=>'<span class="cell-strong">'+escapeHtml(r.name)+'</span>'+(r.is_demo?' <span class="demo-flag">demo</span>':'')},
+      {label:'Type', render:r=>r.type},
+      {label:'Category', render:r=>escapeHtml(r.category||'')},
+      {label:'Price', render:r=>'<span class="cell-num">'+fmtMoney(r.promoPrice||r.regularPrice)+'</span>'},
+      {label:'Est. Profit', render:r=>{ const price=r.promoPrice||r.regularPrice; const profit=price-safeNum(r.fulfillmentCost)-safeNum(r.adAllocation)-price*(safeNum(r.paymentFeePct)/100); return '<span class="cell-num" style="color:'+(profit>=0?'var(--success)':'var(--danger)')+'">'+fmtMoney(profit)+'</span>'; }},
+      {label:'Margin', render:r=>{ const price=r.promoPrice||r.regularPrice; const profit=price-safeNum(r.fulfillmentCost)-safeNum(r.adAllocation)-price*(safeNum(r.paymentFeePct)/100); return fmtPct(safeDiv(profit,price)); }},
+      {label:'Status', render:r=>statusBadge(r.status)},
+    ],
+    rowActions:['edit','duplicate','delete'],
+    onCreate:v=>Entities.create('offers', v),
+    onUpdate:(id,v)=>Entities.update('offers', id, v),
+    onDelete:id=>Entities.softDelete('offers', id),
+  });
+}
+
+/* =========================================================================
+   16. CLIENTS PAGE
+   ========================================================================= */
+function renderClientsPage(container){
+  renderCrudPage(container, {
+    stateKey:'clients', collection:'clients', title:'Clients', subtitle:'Every client relationship, project status, and balance — auto-calculated from Sales.',
+    itemName:'Client', icon:'clients', exportName:'clients',
+    emptyTitle:'No clients yet.', emptyDesc:'Add your first client to start linking sales and tracking balances.', emptyCta:'Add Client',
+    formFields:clientFields(), formDefaults:()=>({projectStatus:'New Lead', startDate:todayStr()}),
+    searchText:r=>r.name+' '+r.company+' '+r.email,
+    filters:[{key:'projectStatus', label:'Status', options:['New Lead','Confirmed','Waiting for Payment','In Production','For Review','Revision','Completed','Cancelled'], match:(r,v)=>r.projectStatus===v}],
+    defaultSort:(a,b)=>a.name.localeCompare(b.name),
+    columns:[
+      {label:'Client', render:r=>'<div style="display:flex;align-items:center;gap:9px;"><div class="avatar">'+initials(r.name)+'</div><div><div class="cell-strong">'+escapeHtml(r.name)+'</div><div class="cell-muted" style="font-size:11px;">'+escapeHtml(r.company||'')+'</div></div></div>'},
+      {label:'Contract Value', render:r=>'<span class="cell-num">'+fmtMoney(Calc_clientTotals(r.id).totalContractValue)+'</span>'},
+      {label:'Paid', render:r=>'<span class="cell-num">'+fmtMoney(Calc_clientTotals(r.id).amountPaid)+'</span>'},
+      {label:'Balance', render:r=>{ const b=Calc_clientTotals(r.id).remainingBalance; return '<span class="cell-num" style="color:'+(b>0?'var(--warning)':'var(--success)')+'">'+fmtMoney(b)+'</span>'; }},
+      {label:'Payment', render:r=>statusBadge(Calc_clientTotals(r.id).paymentStatus)},
+      {label:'Project Status', render:r=>statusBadge(r.projectStatus)},
+      {label:'Manager', render:r=>escapeHtml(r.accountManager||'—')},
+    ],
+    rowActions:['edit','delete'],
+    onCreate:v=>Entities.create('clients', v),
+    onUpdate:(id,v)=>Entities.update('clients', id, v),
+    onDelete:id=>Entities.softDelete('clients', id),
+  });
+}
+
+/* =========================================================================
+   17. RECEIVABLES PAGE (derived from Sales)
+   ========================================================================= */
+function renderReceivablesPage(container){
+  const all = Calc_outstandingReceivables();
+  const total = all.reduce((a,s)=>a+Calc_saleBalance(s),0);
+  const dueThisWeek = all.filter(s=>s.dueDate && s.dueDate>=todayStr() && s.dueDate<=addDays(todayStr(),7)).reduce((a,s)=>a+Calc_saleBalance(s),0);
+  const overdue = all.filter(s=>Calc_saleStatus(s)==='Overdue').reduce((a,s)=>a+Calc_saleBalance(s),0);
+  const thisMonthRange = resolveRange('This Month');
+  const collectedThisMonth = Entities.list('sales').filter(s=>inRange(s.date, thisMonthRange.start, thisMonthRange.end)).reduce((a,s)=>a+safeNum(s.amountPaid),0);
+
+  let html = '<div class="page-head"><div><h2>Receivables</h2><p class="sub">Calculated live from Sales — record a payment here and it updates the client, the sale and the cash account together.</p></div></div>';
+  html += '<div class="grid kpi-grid" style="margin-bottom:20px;">'+
+    kpiCardHtml('Total Receivables', fmtMoney(total))+
+    kpiCardHtml('Due This Week', fmtMoney(dueThisWeek))+
+    kpiCardHtml('Overdue', fmtMoney(overdue))+
+    kpiCardHtml('Collected This Month', fmtMoney(collectedThisMonth))+
+    '</div>';
+  if(!all.length){
+    html += '<div class="card"><div class="empty-state">'+icon('receivables','icon-lg')+'<h4>Nothing outstanding.</h4><p>Every recorded sale has been paid in full. New unpaid or partial sales will show up here.</p></div></div>';
+  } else {
+    html += '<div class="table-wrap"><table class="tbl"><thead><tr><th>Client</th><th>Reference</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Days Overdue</th><th>Status</th><th></th></tr></thead><tbody>'+
+      all.sort((a,b)=>Calc_saleBalance(b)-Calc_saleBalance(a)).map(s=>{
+        const c=clientOf(s.clientId); const status=Calc_saleStatus(s); const overdueDays = status==='Overdue'?Math.max(0,daysBetween(s.dueDate,todayStr())):0;
+        return '<tr><td class="cell-strong">'+escapeHtml(c?c.name:'—')+'</td><td class="cell-muted">#'+s.id.slice(-6).toUpperCase()+'</td>'+
+          '<td class="cell-num">'+fmtMoney(Calc_saleGross(s)-s.refund)+'</td><td class="cell-num">'+fmtMoney(s.amountPaid)+'</td>'+
+          '<td class="cell-num cell-strong">'+fmtMoney(Calc_saleBalance(s))+'</td><td>'+fmtDateShort(s.dueDate)+'</td>'+
+          '<td class="cell-num" style="color:'+(overdueDays>0?'var(--danger)':'var(--text3)')+'">'+(overdueDays>0?overdueDays:'—')+'</td>'+
+          '<td>'+statusBadge(status)+'</td><td><button class="btn btn-sm btn-primary" data-payid="'+s.id+'">Record Payment</button></td></tr>';
+      }).join('')+'</tbody></table></div>';
+  }
+  container.innerHTML = html;
+  container.querySelectorAll('[data-payid]').forEach(btn=> btn.onclick = ()=> openRecordPaymentModal(btn.getAttribute('data-payid')));
+}
+function openRecordPaymentModal(saleId){
+  const s = Entities.get('sales', saleId); if(!s) return;
+  const bal = Calc_saleBalance(s);
+  const html = '<div class="modal-panel"><div class="modal-head"><h3>Record Payment</h3><button class="btn btn-icon btn-ghost" id="rpClose">'+icon('close')+'</button></div>'+
+    '<div class="modal-body">'+
+    '<div class="field"><label class="field-label">Remaining Balance</label><div class="num" style="font-size:20px; font-weight:800;">'+fmtMoney(bal)+'</div></div>'+
+    '<div class="field"><label class="field-label">Payment Amount</label><input class="input" type="number" id="rpAmount" value="'+bal+'" max="'+bal+'"></div>'+
+    '<div class="field"><label class="field-label">Date</label><input class="input" type="date" id="rpDate" value="'+todayStr()+'"></div>'+
+    '<div class="field"><label class="field-label">Deposit To</label><select class="select" id="rpAccount">'+optAccounts().map(a=>'<option value="'+a.value+'" '+(a.value===s.account?'selected':'')+'>'+a.label+'</option>').join('')+'</select></div>'+
+    '</div><div class="modal-foot"><button class="btn" id="rpCancel">Cancel</button><button class="btn btn-primary" id="rpSave">'+icon('check')+' Save Payment</button></div></div>';
+  openModalRaw(html);
+  document.getElementById('rpClose').onclick = closeModal;
+  document.getElementById('rpCancel').onclick = closeModal;
+  document.getElementById('rpSave').onclick = ()=>{
+    const amt = clamp(parseFloat(document.getElementById('rpAmount').value)||0, 0, bal);
+    const acct = document.getElementById('rpAccount').value;
+    Entities.update('sales', saleId, {amountPaid: safeNum(s.amountPaid)+amt, account: acct});
+    closeModal(); render(); toast('Payment recorded.');
+  };
+}
+
+/* =========================================================================
+   18. EXPENSES + OPEX
+   ========================================================================= */
+function renderExpensesPage(container){
+  let ui = CRUD_UI['expTabs'] = CRUD_UI['expTabs']||{tab:'list'};
+  const tabsHtml = '<div class="tabs" style="margin-bottom:16px;"><button class="tab-btn '+(ui.tab==='list'?'active':'')+'" data-tab="list">All Expenses</button><button class="tab-btn '+(ui.tab==='opex'?'active':'')+'" data-tab="opex">OPEX Breakdown</button></div>';
+  const wrap = document.createElement('div');
+  wrap.innerHTML = tabsHtml+'<div id="expTabBody"></div>';
+  container.innerHTML='';
+  container.appendChild(wrap);
+  wrap.querySelectorAll('.tab-btn').forEach(b=> b.onclick=()=>{ ui.tab=b.getAttribute('data-tab'); renderExpensesPage(container); });
+  const body = wrap.querySelector('#expTabBody');
+  if(ui.tab==='list'){
+    renderCrudPage(body, {
+      stateKey:'expenses', collection:'expenses', title:'Expenses', subtitle:'Manual costs not already tracked via Advertising or Team & Payroll.',
+      itemName:'Expense', icon:'expenses', exportName:'expenses',
+      emptyTitle:'No expenses recorded yet.', emptyDesc:'Add your first expense to start tracking spending.', emptyCta:'Add Expense',
+      formFields:expenseFields(), formDefaults:()=>({date:todayStr(), tag:'Business'}),
+      searchText:r=>r.name+' '+r.vendor,
+      filters:[{key:'categoryId', label:'Category', options:optExpenseCats(false).map(o=>o.label), match:(r,v)=>{ const c=categoryOf(r.categoryId); return c&&c.name===v; }}],
+      defaultSort:(a,b)=>b.date.localeCompare(a.date),
+      columns:[
+        {label:'Date', render:r=>fmtDateShort(r.date)},
+        {label:'Name', render:r=>escapeHtml(r.name)},
+        {label:'Category', render:r=>escapeHtml((categoryOf(r.categoryId)||{}).name||'—')},
+        {label:'Vendor', render:r=>escapeHtml(r.vendor||'—')},
+        {label:'Amount', render:r=>'<span class="cell-num cell-strong">'+fmtMoney(r.amount)+'</span>'},
+        {label:'Account', render:r=>escapeHtml((accountOf(r.account)||{}).name||'—')},
+        {label:'Recurring', render:r=>r.recurring?('<span class="badge badge-info">'+(r.frequency||'Yes')+'</span>'):'<span class="cell-muted">—</span>'},
+      ],
+      rowActions:['edit','duplicate','delete'],
+      onCreate:v=>Entities.create('expenses', v),
+      onUpdate:(id,v)=>Entities.update('expenses', id, v),
+      onDelete:id=>Entities.softDelete('expenses', id),
+    });
+  } else {
+    const range = resolveRange('This Month');
+    const lines = getAllExpenseLines(range);
+    const fixed = lines.filter(l=>l.behavior==='fixed').reduce((a,l)=>a+l.amount,0);
+    const variable = lines.filter(l=>l.behavior==='variable').reduce((a,l)=>a+l.amount,0);
+    const total = fixed+variable;
+    const p = Calc_period(range);
+    const byCat = {};
+    lines.forEach(l=>{ const k=l.behavior+' · '+l.categoryName; byCat[k]=(byCat[k]||0)+l.amount; });
+    body.innerHTML = '<p class="sub" style="margin-bottom:14px;">'+fmtMonthLabel(monthKey(todayStr()))+' — fixed vs. variable operating costs, including auto-flowed advertising and payroll.</p>'+
+      '<div class="grid grid-3" style="margin-bottom:18px;">'+
+      kpiCardHtml('Monthly Fixed OPEX', fmtMoney(fixed))+kpiCardHtml('Monthly Variable OPEX', fmtMoney(variable))+kpiCardHtml('OPEX as % of Revenue', fmtPct(safeDiv(total,p.netRevenue)))+
+      '</div><div class="card"><div class="card-head"><h3>Cost Breakdown</h3></div><div id="opexChart"></div></div>';
+    mountBarChart(body.querySelector('#opexChart'), Object.keys(byCat).map(k=>({label:k,value:byCat[k]})).sort((a,b)=>b.value-a.value), {horizontal:true, yFormat:fmtMoney});
+  }
+}
+
+/* =========================================================================
+   19. ADVERTISING PAGE
+   ========================================================================= */
+function renderAdvertisingPage(container){
+  const range = APP.range && APP.route==='advertising' ? APP.range : resolveRange('This Month');
+  const rangeActual = resolveRange('This Month');
+  const p = Calc_period(rangeActual);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = '<div class="grid kpi-grid" style="margin-bottom:18px;" id="adKpis"></div><div id="adTableHost"></div>';
+  container.innerHTML=''; container.appendChild(wrap);
+  document.getElementById('adKpis').innerHTML =
+    kpiCardHtml('Total Ad Spend', fmtMoney(p.adSpend), null, 'This month')+
+    kpiCardHtml('Total Messages', fmtNum(p.totalMessages,0))+
+    kpiCardHtml('Avg. Cost / Message', fmtMoney(p.cpm))+
+    kpiCardHtml('Total Purchases', fmtNum(p.totalPurchases,0))+
+    kpiCardHtml('Avg. Cost / Purchase', fmtMoney(p.cpp))+
+    kpiCardHtml('Revenue From Ads', fmtMoney(p.revenueFromAds))+
+    kpiCardHtml('Attributed ROAS', (p.roasAttributed||0).toFixed(2)+'x')+
+    kpiCardHtml('Blended ROAS', (p.roasBlended||0).toFixed(2)+'x', null, 'Net Revenue ÷ Ad Spend across the whole business');
+  renderCrudPage(document.getElementById('adTableHost'), {
+    stateKey:'campaigns', collection:'campaigns', title:'Advertising Tracker', subtitle:'One row per campaign batch. Cost per message, cost per purchase and ROAS calculate automatically.',
+    itemName:'Ad Entry', icon:'advertising', exportName:'advertising',
+    emptyTitle:'No ad performance logged yet.', emptyDesc:'Add your first ad entry to start tracking spend and ROAS.', emptyCta:'Add Ad Performance',
+    formFields:campaignFields(), formDefaults:()=>({date:todayStr(), platform:'Meta Ads', messages:0, purchases:0, revenueGenerated:0}),
+    searchText:r=>r.campaignName+' '+r.platform,
+    filters:[{key:'platform', label:'Platform', options:['Meta Ads','TikTok Ads','Google Ads','Other'], match:(r,v)=>r.platform===v}],
+    defaultSort:(a,b)=>b.date.localeCompare(a.date),
+    columns:[
+      {label:'Date', render:r=>fmtDateShort(r.date)},
+      {label:'Platform', render:r=>'<span class="badge badge-info">'+r.platform+'</span>'},
+      {label:'Campaign', render:r=>escapeHtml(r.campaignName)},
+      {label:'Spend', render:r=>'<span class="cell-num">'+fmtMoney(r.adSpend)+'</span>'},
+      {label:'Messages', render:r=>'<span class="cell-num">'+fmtNum(r.messages,0)+'</span>'},
+      {label:'CPM', render:r=>'<span class="cell-num">'+fmtMoney(safeDiv(r.adSpend,r.messages))+'</span>'},
+      {label:'Purchases', render:r=>'<span class="cell-num">'+fmtNum(r.purchases,0)+'</span>'},
+      {label:'CPP', render:r=>'<span class="cell-num">'+fmtMoney(safeDiv(r.adSpend,r.purchases))+'</span>'},
+      {label:'ROAS', render:r=>{ const roas=safeDiv(r.revenueGenerated,r.adSpend); const th=Settings().thresholds; return '<span class="cell-num" style="color:'+(roas>=th.goodROAS?'var(--success)':roas<th.lowROAS?'var(--danger)':'var(--text)')+'; font-weight:800;">'+roas.toFixed(2)+'x</span>'; }},
+    ],
+    rowActions:['edit','duplicate','delete'],
+    onCreate:v=>Entities.create('campaigns', v),
+    onUpdate:(id,v)=>Entities.update('campaigns', id, v),
+    onDelete:id=>Entities.softDelete('campaigns', id),
+  });
+}
+
+/* =========================================================================
+   20. TEAM & PAYROLL PAGE
+   ========================================================================= */
+function renderTeamPage(container){
+  let ui = CRUD_UI['teamTabs'] = CRUD_UI['teamTabs']||{tab:'members'};
+  const wrap = document.createElement('div');
+  wrap.innerHTML = '<div class="tabs" style="margin-bottom:16px;"><button class="tab-btn '+(ui.tab==='members'?'active':'')+'" data-tab="members">Team Members</button><button class="tab-btn '+(ui.tab==='history'?'active':'')+'" data-tab="history">Payment History</button></div><div id="teamTabBody"></div>';
+  container.innerHTML=''; container.appendChild(wrap);
+  wrap.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>{ui.tab=b.getAttribute('data-tab'); renderTeamPage(container);});
+  const body = wrap.querySelector('#teamTabBody');
+  if(ui.tab==='members'){
+    renderCrudPage(body, {
+      stateKey:'team', collection:'teamMembers', title:'Team Members', subtitle:'Editors, VAs, media buyers and freelancers — amounts due calculate automatically.',
+      itemName:'Team Member', icon:'team', exportName:'team',
+      emptyTitle:'No team members yet.', emptyDesc:'Add your first team member to start tracking payroll.', emptyCta:'Add Team Member',
+      formFields:memberFields(), formDefaults:()=>({paymentType:'Monthly Salary', status:'Active'}),
+      searchText:r=>r.name+' '+r.role,
+      filters:[{key:'status', label:'Status', options:['Active','Inactive'], match:(r,v)=>r.status===v}],
+      defaultSort:(a,b)=>a.name.localeCompare(b.name),
+      columns:[
+        {label:'Name', render:r=>'<div style="display:flex;align-items:center;gap:9px;"><div class="avatar">'+initials(r.name)+'</div><span class="cell-strong">'+escapeHtml(r.name)+'</span></div>'},
+        {label:'Role', render:r=>escapeHtml(r.role)},
+        {label:'Payment Type', render:r=>r.paymentType},
+        {label:'Due', render:r=>'<span class="cell-num">'+fmtMoney(Calc_memberAmounts(r.id).due)+'</span>'},
+        {label:'Paid (Month)', render:r=>'<span class="cell-num">'+fmtMoney(Calc_memberAmounts(r.id).paidThisMonth)+'</span>'},
+        {label:'Balance', render:r=>{ const b=Calc_memberAmounts(r.id).remaining; return '<span class="cell-num" style="color:'+(b>0?'var(--warning)':'var(--success)')+'">'+fmtMoney(b)+'</span>'; }},
+        {label:'Last Payment', render:r=>fmtDateShort(Calc_memberAmounts(r.id).lastPayment)},
+        {label:'Status', render:r=>statusBadge(r.status)},
+      ],
+      rowActions:['edit','delete'],
+      onCreate:v=>Entities.create('teamMembers', v),
+      onUpdate:(id,v)=>Entities.update('teamMembers', id, v),
+      onDelete:id=>Entities.softDelete('teamMembers', id),
+    });
+    const addBtn = body.querySelector('#crudAddBtn');
+    if(addBtn){
+      const logBtn = document.createElement('button');
+      logBtn.className='btn'; logBtn.innerHTML = icon('plus')+' Log Payment';
+      logBtn.onclick = ()=> openEntityForm({title:'Payroll Payment', fields:payrollFields(), defaults:()=>({date:todayStr(), type:'Salary'}), onSave:v=>Entities.create('payroll', v)});
+      addBtn.parentNode.insertBefore(logBtn, addBtn);
+    }
+  } else {
+    renderCrudPage(body, {
+      stateKey:'payroll', collection:'payroll', title:'Payment History', subtitle:'Every payroll payment made, flowing automatically into Expenses and Cash Accounts.',
+      itemName:'Payment', icon:'team', exportName:'payroll',
+      emptyTitle:'No payments logged yet.', emptyDesc:'Log your first payroll payment.', emptyCta:'Log Payment',
+      formFields:payrollFields(), formDefaults:()=>({date:todayStr(), type:'Salary'}),
+      searchText:r=>{ const m=memberOf(r.teamMemberId); return m?m.name:''; },
+      filters:[],
+      defaultSort:(a,b)=>b.date.localeCompare(a.date),
+      columns:[
+        {label:'Date', render:r=>fmtDateShort(r.date)},
+        {label:'Member', render:r=>escapeHtml((memberOf(r.teamMemberId)||{}).name||'—')},
+        {label:'Type', render:r=>r.type},
+        {label:'Amount', render:r=>'<span class="cell-num cell-strong">'+fmtMoney(r.amount)+'</span>'},
+        {label:'Account', render:r=>escapeHtml((accountOf(r.account)||{}).name||'—')},
+      ],
+      rowActions:['edit','delete'],
+      onCreate:v=>Entities.create('payroll', v),
+      onUpdate:(id,v)=>Entities.update('payroll', id, v),
+      onDelete:id=>Entities.softDelete('payroll', id),
+    });
+  }
+}
+
+/* =========================================================================
+   21. CASH ACCOUNTS PAGE
+   ========================================================================= */
+function renderCashPage(container){
+  let ui = CRUD_UI['cashTabs'] = CRUD_UI['cashTabs']||{tab:'accounts'};
+  const accounts = Entities.list('cashAccounts');
+  const totalBalance = accounts.reduce((a,acc)=>a+Calc_cashAccountBalance(acc.id),0);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = '<div class="page-head"><div><h2>Cash Accounts</h2><p class="sub">Manual balance tracking across every wallet, bank and processor. All amounts are tracked in '+s_currCode()+'.</p></div>'+
+    '<div class="toolbar"><button class="btn btn-primary" id="cashAddAcctBtn">'+icon('plus')+' Add Account</button><button class="btn" id="cashAddTxnBtn">'+icon('plus')+' Add Transfer / Capital</button></div></div>'+
+    '<div class="grid kpi-grid" style="margin-bottom:18px;">'+kpiCardHtml('Total Cash', fmtMoney(totalBalance))+'</div>'+
+    '<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); margin-bottom:20px;" id="acctCards"></div>'+
+    '<div class="tabs" style="margin-bottom:14px;"><button class="tab-btn '+(ui.tab==='accounts'?'active':'')+'" data-tab="accounts">Accounts</button><button class="tab-btn '+(ui.tab==='ledger'?'active':'')+'" data-tab="ledger">Transfers & Capital</button></div>'+
+    '<div id="cashTabBody"></div>';
+  container.innerHTML=''; container.appendChild(wrap);
+  document.getElementById('acctCards').innerHTML = accounts.map(acc=>{
+    const flow = Calc_cashAccountFlow(acc.id, resolveRange('This Month'));
+    const bal = Calc_cashAccountBalance(acc.id);
+    return '<div class="card"><div class="card-head"><h3>'+escapeHtml(acc.name)+'</h3><span class="sub">'+acc.type+(acc.currency!=='PHP'?' · held in '+acc.currency:'')+'</span></div>'+
+      '<div class="num" style="font-size:22px; font-weight:800;">'+fmtMoney(bal)+'</div>'+
+      '<div class="divider"></div><div style="display:flex; justify-content:space-between; font-size:11.8px;"><span style="color:var(--success);">'+icon('arrowUp','icon-sm')+' In: '+fmtMoney(flow.inAmt)+'</span><span style="color:var(--danger);">'+icon('arrowDown','icon-sm')+' Out: '+fmtMoney(flow.outAmt)+'</span></div>'+
+      '<div class="cell-muted" style="font-size:11px; margin-top:8px;">Last activity: '+fmtDateShort(Calc_cashAccountMoveDates(acc.id))+'</div>'+
+      '<div style="margin-top:12px; display:flex; gap:6px;"><button class="btn btn-sm" data-editacct="'+acc.id+'">Edit</button><button class="btn btn-sm btn-danger" data-delacct="'+acc.id+'">Delete</button></div></div>';
+  }).join('') || '<div class="card"><div class="empty-state">'+icon('cash','icon-lg')+'<h4>No accounts yet.</h4><p>Add GCash, Bank, PayPal or another account to start tracking cash.</p></div></div>';
+
+  document.getElementById('cashAddAcctBtn').onclick = ()=> openEntityForm({title:'Cash Account', fields:accountFields(), defaults:()=>({type:'GCash', currency:'PHP', fxRateToPHP:1, openingBalance:0}), onSave:v=>Entities.create('cashAccounts', v)});
+  document.getElementById('cashAddTxnBtn').onclick = ()=> openEntityForm({title:'Transfer / Capital Movement', fields:accountTxnFields(), defaults:()=>({date:todayStr(), type:'Transfer'}), onSave:v=>Entities.create('accountTransactions', v)});
+  wrap.querySelectorAll('[data-editacct]').forEach(b=> b.onclick=()=> openEntityForm({title:'Cash Account', fields:accountFields(), onSave:v=>Entities.update('cashAccounts', b.getAttribute('data-editacct'), v), onDelete:()=>Entities.softDelete('cashAccounts', b.getAttribute('data-editacct'))}, Entities.get('cashAccounts', b.getAttribute('data-editacct'))));
+  wrap.querySelectorAll('[data-delacct]').forEach(b=> b.onclick=async ()=>{ const ok=await confirmDialog({title:'Delete account?', message:'Historical transactions referencing this account will remain, but it will no longer appear in pickers.', danger:true, okText:'Delete'}); if(ok){ Entities.softDelete('cashAccounts', b.getAttribute('data-delacct')); render(); toast('Account deleted.'); } });
+  wrap.querySelectorAll('.tab-btn').forEach(b=> b.onclick=()=>{ ui.tab=b.getAttribute('data-tab'); renderCashPage(container); });
+
+  const body = wrap.querySelector('#cashTabBody');
+  if(ui.tab==='accounts'){
+    body.innerHTML = '<p class="sub">Transfers between accounts, owner draws and capital movements never affect revenue or profit — track them in the Transfers & Capital tab.</p>';
+  } else {
+    renderCrudPage(body, {
+      stateKey:'accountTxns', collection:'accountTransactions', title:'Transfers & Capital', subtitle:'Non-P&L cash movements: transfers, owner draws, loans and capital.',
+      itemName:'Movement', icon:'cash', exportName:'account_transactions',
+      emptyTitle:'No transfers logged yet.', emptyDesc:'Log a transfer, draw or capital movement.', emptyCta:'Add Movement',
+      formFields:accountTxnFields(), formDefaults:()=>({date:todayStr(), type:'Transfer'}),
+      searchText:r=>r.type+' '+(r.notes||''),
+      filters:[{key:'type', label:'Type', options:['Transfer','Capital In',"Owner's Draw",'Loan In','Loan Out','Opening Adjustment'], match:(r,v)=>r.type===v}],
+      defaultSort:(a,b)=>b.date.localeCompare(a.date),
+      columns:[
+        {label:'Date', render:r=>fmtDateShort(r.date)},
+        {label:'Type', render:r=>'<span class="badge badge-neutral">'+r.type+'</span>'},
+        {label:'From', render:r=>escapeHtml((accountOf(r.fromAccount)||{}).name||'—')},
+        {label:'To', render:r=>escapeHtml((accountOf(r.toAccount)||{}).name||'—')},
+        {label:'Amount', render:r=>'<span class="cell-num cell-strong">'+fmtMoney(r.amount)+'</span>'},
+        {label:'Notes', render:r=>escapeHtml(r.notes||'')},
+      ],
+      rowActions:['edit','delete'],
+      onCreate:v=>Entities.create('accountTransactions', v),
+      onUpdate:(id,v)=>Entities.update('accountTransactions', id, v),
+      onDelete:id=>Entities.softDelete('accountTransactions', id),
+    });
+  }
+}
+
+/* =========================================================================
+   22. TARGETS + BREAK-EVEN
+   ========================================================================= */
+function targetFields(){
+  return [
+    {key:'month', label:'Month', type:'text', required:true, readonly:true, hint:'YYYY-MM — set automatically for the month you\'re viewing.'},
+    {key:'revenueGoal', label:'Monthly Revenue Goal', type:'currency', required:true},
+    {key:'profitGoal', label:'Monthly Net Profit Goal', type:'currency'},
+    {key:'maxExpenseBudget', label:'Maximum Expense Budget', type:'currency'},
+    {key:'maxAdBudget', label:'Maximum Ad Budget', type:'currency'},
+    {key:'salesTarget', label:'Sales Target (# of sales)', type:'number'},
+    {key:'targetRoas', label:'Target ROAS', type:'number'},
+  ];
+}
+function renderTargetsPage(container){
+  let ui = CRUD_UI['targetsMonth'] = CRUD_UI['targetsMonth']||{month:monthKey(todayStr())};
+  const tgt = Entities.list('targets').find(t=>t.month===ui.month);
+  const mRange = resolveRange('Custom Range', {start:ui.month+'-01', end: ui.month===monthKey(todayStr())?todayStr(): toDateStr(new Date(+ui.month.slice(0,4), +ui.month.slice(5,7),0)) });
+  const mp = Calc_period(mRange);
+  const be = Calc_breakeven(mRange);
+
+  let html = '<div class="page-head"><div><h2>Business Targets</h2><p class="sub">Monthly goals, tracked independently so editing one month never changes another.</p></div>'+
+    '<div class="toolbar"><button class="btn btn-icon" id="tgtPrev">'+icon('chevronLeft','icon-sm')+'</button><span style="font-weight:800; font-size:13px; align-self:center;">'+fmtMonthLabel(ui.month)+'</span><button class="btn btn-icon" id="tgtNext">'+icon('chevronRight','icon-sm')+'</button>'+
+    '<button class="btn btn-primary" id="tgtEditBtn">'+icon('edit')+' '+(tgt?'Edit':'Set')+' Targets</button></div></div>';
+
+  if(!tgt){
+    html += '<div class="card"><div class="empty-state">'+icon('targets','icon-lg')+'<h4>No targets set for '+fmtMonthLabel(ui.month)+'.</h4><p>Set a revenue goal, expense budget and ROAS target for this month.</p></div></div>';
+  } else {
+    const pct = clamp(safeDiv(mp.netRevenue,tgt.revenueGoal),0,1.5);
+    const daysInMonth = new Date(+ui.month.slice(0,4), +ui.month.slice(5,7), 0).getDate();
+    const isCurrentMonth = ui.month===monthKey(todayStr());
+    const dayOfMonth = isCurrentMonth ? new Date().getDate() : daysInMonth;
+    const daysRemaining = isCurrentMonth ? Math.max(0,daysInMonth-dayOfMonth) : 0;
+    const remaining = Math.max(0, tgt.revenueGoal-mp.netRevenue);
+    const requiredDaily = daysRemaining>0?remaining/daysRemaining:0;
+    const projected = dayOfMonth>0 ? (mp.netRevenue/dayOfMonth)*daysInMonth : 0;
+
+    html += '<div class="card pad-lg" style="margin-bottom:16px;">'+
+      '<div class="card-head"><h3>MONTHLY REVENUE GOAL</h3><span class="sub">'+fmtMoney(tgt.revenueGoal)+'</span></div>'+
+      '<div class="progress-track" style="height:14px; margin-bottom:10px;"><div class="progress-fill '+(pct<0.5?'danger':pct<0.85?'warning':'')+'" style="width:'+(pct*100)+'%"></div></div>'+
+      '<div style="font-size:13px; font-weight:700; margin-bottom:16px;">'+fmtPct(pct)+' achieved · Current: '+fmtMoney(mp.netRevenue)+'</div>'+
+      '<div class="grid grid-3">'+
+      '<div class="mini-stat"><span class="lbl">Remaining</span><span class="val num">'+fmtMoney(remaining)+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Days Remaining</span><span class="val num">'+daysRemaining+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Required Daily Revenue</span><span class="val num">'+fmtMoney(requiredDaily)+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Projected Month-End</span><span class="val num">'+fmtMoney(projected)+'</span></div>'+
+      '<div class="mini-stat"><span class="lbl">Net Profit Goal</span><span class="val num">'+fmtMoney(tgt.profitGoal)+' <span class="cell-muted" style="font-size:11px;">('+fmtPct(safeDiv(mp.netProfit,tgt.profitGoal||1))+')</span></span></div>'+
+      '<div class="mini-stat"><span class="lbl">Sales Target</span><span class="val num">'+mp.sales.length+' / '+tgt.salesTarget+'</span></div>'+
+      '</div></div>';
+
+    html += '<div class="grid grid-3" style="margin-bottom:16px;">'+
+      '<div class="card"><div class="card-head"><h3>Expense Budget</h3></div>'+budgetBar(mp.totalExpenses, tgt.maxExpenseBudget)+'</div>'+
+      '<div class="card"><div class="card-head"><h3>Ad Budget</h3></div>'+budgetBar(mp.adSpend, tgt.maxAdBudget)+'</div>'+
+      '<div class="card"><div class="card-head"><h3>ROAS vs Target</h3></div><div class="num" style="font-size:24px; font-weight:800; color:'+(mp.roasBlended>=tgt.targetRoas?'var(--success)':'var(--warning)')+'">'+(mp.roasBlended||0).toFixed(2)+'x</div><div class="cell-muted" style="font-size:12px; margin-top:4px;">Target: '+tgt.targetRoas+'x</div></div>'+
+      '</div>';
+  }
+
+  html += '<div class="card pad-lg"><div class="card-head"><h3>Break-Even Analysis</h3><span class="sub">'+fmtMonthLabel(ui.month)+'</span></div>'+
+    '<div class="grid grid-3" style="margin-bottom:14px;">'+
+    '<div class="mini-stat"><span class="lbl">Monthly Fixed Expenses</span><span class="val num">'+fmtMoney(be.fixed)+'</span></div>'+
+    '<div class="mini-stat"><span class="lbl">Avg. Contribution Margin</span><span class="val num">'+fmtPct(be.contributionMargin)+'</span></div>'+
+    '<div class="mini-stat"><span class="lbl">Break-Even Revenue</span><span class="val num">'+fmtMoney(be.breakEvenRevenue)+'</span></div>'+
+    '</div>'+
+    '<div class="badge '+(be.passed?'badge-success':'badge-warning')+'" style="font-size:12px; padding:8px 14px;">'+
+    (be.passed ? '✓ You have passed your break-even point for '+fmtMonthLabel(ui.month)+'.' : fmtMoney(Math.max(0,be.breakEvenRevenue-be.currentRevenue))+' remaining to reach break-even ('+(be.salesNeeded||0)+' more avg.-value sales).')+
+    '</div></div>';
+
+  container.innerHTML = html;
+  document.getElementById('tgtPrev').onclick = ()=>{ const d=new Date(+ui.month.slice(0,4), +ui.month.slice(5,7)-2, 1); ui.month=d.getFullYear()+'-'+pad2(d.getMonth()+1); render(); };
+  document.getElementById('tgtNext').onclick = ()=>{ const d=new Date(+ui.month.slice(0,4), +ui.month.slice(5,7), 1); ui.month=d.getFullYear()+'-'+pad2(d.getMonth()+1); render(); };
+  document.getElementById('tgtEditBtn').onclick = ()=> openEntityForm({
+    title:'Monthly Targets', fields:targetFields(), defaults:()=>({month:ui.month, revenueGoal:0, profitGoal:0, maxExpenseBudget:0, maxAdBudget:0, salesTarget:0, targetRoas:4}),
+    onSave:v=>{ if(tgt) Entities.update('targets', tgt.id, v); else Entities.create('targets', Object.assign({},v,{month:ui.month})); }
+  }, tgt);
+}
+function budgetBar(used, max){
+  const pct = clamp(safeDiv(used,max),0,1.4);
+  return '<div class="num" style="font-size:20px; font-weight:800; margin-bottom:8px;">'+fmtMoney(used)+' <span class="cell-muted" style="font-size:12px; font-weight:600;">/ '+fmtMoney(max)+'</span></div>'+
+    '<div class="progress-track"><div class="progress-fill '+(pct>=1?'danger':pct>=0.85?'warning':'')+'" style="width:'+(pct*100)+'%"></div></div>'+
+    '<div class="cell-muted" style="font-size:11.5px; margin-top:6px;">'+fmtPct(pct)+' of budget used</div>';
+}
+
+/* =========================================================================
+   23. REPORTS PAGE
+   ========================================================================= */
+function renderReportsPage(container){
+  let ui = CRUD_UI['reportsUi'] = CRUD_UI['reportsUi']||{preset:'This Month'};
+  const range = resolveRange(ui.preset);
+  const p = Calc_period(range);
+
+  let html = '<div class="page-head"><div><h2>Reports</h2><p class="sub">Interactive charts across every part of the business.</p></div>'+
+    '<div class="toolbar"><select class="select" id="repRangeSel" style="width:auto;">'+RANGE_PRESETS.filter(r=>r!=='Custom Range').map(r=>'<option '+(ui.preset===r?'selected':'')+'>'+r+'</option>').join('')+'</select></div></div>';
+
+  html += businessPerformanceHtml(p, range) + monthlyScorecardHtml();
+
+  html += '<div class="grid" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">'+
+    '<div class="card"><div class="card-head"><h3>Monthly Revenue</h3></div><div id="repMonthlyRev"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Monthly Net Profit</h3></div><div id="repMonthlyProfit"></div></div>'+
+    '</div>';
+  html += '<div class="card" style="margin-bottom:14px;"><div class="card-head"><h3>Revenue by Offer</h3><div class="pill-tabs" id="repOfferTypeTabs"><span class="pill active" data-type="all">All</span><span class="pill" data-type="Service">Services</span><span class="pill" data-type="Digital Product">Digital Products</span></div></div><div id="repRevByOffer"></div></div>';
+  html += '<div class="grid" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">'+
+    '<div class="card"><div class="card-head"><h3>Expense Breakdown</h3></div><div id="repExpBreakdown"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Revenue by Category</h3></div><div id="repRevByCategory"></div></div>'+
+    '</div>';
+  html += '<div class="grid" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">'+
+    '<div class="card"><div class="card-head"><h3>Advertising Spend vs Revenue</h3></div><div id="repAdVsRev"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>ROAS Trend</h3></div><div id="repRoasTrend"></div></div>'+
+    '</div>';
+  html += '<div class="grid" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">'+
+    '<div class="card"><div class="card-head"><h3>Sales by Offer</h3></div><div id="repSalesByOffer"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Top Clients by Revenue</h3></div><div id="repTopClients"></div></div>'+
+    '</div>';
+  html += '<div class="grid" style="grid-template-columns:1fr 1fr;">'+
+    '<div class="card"><div class="card-head"><h3>Receivables Aging</h3></div><div id="repReceivablesAging"></div></div>'+
+    '<div class="card"><div class="card-head"><h3>Payroll Costs</h3></div><div id="repPayroll"></div></div>'+
+    '</div>';
+
+  container.innerHTML = html;
+  document.getElementById('repRangeSel').onchange = e=>{ ui.preset=e.target.value; render(); };
+
+  const months = monthsBack(6);
+  const revS=[], profS=[], adS=[], adRevS=[], roasS=[];
+  months.forEach(mk=>{
+    const r = resolveRange('Custom Range', {start:mk+'-01', end: mk===monthKey(todayStr())?todayStr():toDateStr(new Date(+mk.slice(0,4), +mk.slice(5,7),0))});
+    const pm = Calc_period(r);
+    revS.push(round0(pm.netRevenue)); profS.push(round0(pm.netProfit)); adS.push(round0(pm.adSpend)); adRevS.push(round0(pm.revenueFromAds)); roasS.push(+((pm.roasBlended)||0).toFixed(2));
+  });
+  mountBarChart(document.getElementById('repMonthlyRev'), months.map((m,i)=>({label:fmtMonthLabel(m).split(' ')[0], value:revS[i]})), {yFormat:fmtMoney});
+  mountBarChart(document.getElementById('repMonthlyProfit'), months.map((m,i)=>({label:fmtMonthLabel(m).split(' ')[0], value:profS[i], color: profS[i]>=0?'#199e70':'#e66767'})), {yFormat:fmtMoney});
+  mountLineChart(document.getElementById('repAdVsRev'), [{name:'Ad Spend', data:adS, color:'#e66767'},{name:'Revenue from Ads', data:adRevS, color:'#3987e5', area:true}], {labels:months.map(m=>fmtMonthLabel(m).split(' ')[0]), yFormat:fmtMoney});
+  mountLineChart(document.getElementById('repRoasTrend'), [{name:'Blended ROAS', data:roasS, color:'#FFD400', area:true}], {labels:months.map(m=>fmtMonthLabel(m).split(' ')[0]), yFormat:v=>v.toFixed(1)+'x'});
+
+  function drawOfferRev(type){
+    const rev={};
+    p.sales.filter(s=>type==='all'||s.type===type).forEach(s=>{ const o=offerOf(s.offerId); const k=o?o.name:'Unknown'; rev[k]=(rev[k]||0)+Calc_saleNet(s); });
+    mountBarChart(document.getElementById('repRevByOffer'), Object.keys(rev).map(k=>({label:k,value:rev[k]})).sort((a,b)=>b.value-a.value).slice(0,8), {horizontal:true, yFormat:fmtMoney});
+  }
+  drawOfferRev('all');
+  document.querySelectorAll('#repOfferTypeTabs .pill').forEach(pill=> pill.onclick=()=>{ document.querySelectorAll('#repOfferTypeTabs .pill').forEach(x=>x.classList.remove('active')); pill.classList.add('active'); drawOfferRev(pill.getAttribute('data-type')); });
+
+  const expByCat={}; p.lines.forEach(l=>{ expByCat[l.categoryName]=(expByCat[l.categoryName]||0)+l.amount; });
+  mountBarChart(document.getElementById('repExpBreakdown'), Object.keys(expByCat).map(k=>({label:k,value:expByCat[k]})).sort((a,b)=>b.value-a.value).slice(0,8), {horizontal:true, yFormat:fmtMoney});
+
+  const revByCat={}; p.sales.forEach(s=>{ revByCat[s.category||'Uncategorized']=(revByCat[s.category||'Uncategorized']||0)+Calc_saleNet(s); });
+  mountBarChart(document.getElementById('repRevByCategory'), Object.keys(revByCat).map(k=>({label:k,value:revByCat[k]})).sort((a,b)=>b.value-a.value).slice(0,8), {horizontal:true, yFormat:fmtMoney});
+
+  const salesByOffer={}; p.sales.forEach(s=>{ const o=offerOf(s.offerId); const k=o?o.name:'Unknown'; salesByOffer[k]=(salesByOffer[k]||0)+safeNum(s.qty); });
+  mountBarChart(document.getElementById('repSalesByOffer'), Object.keys(salesByOffer).map(k=>({label:k,value:salesByOffer[k]})).sort((a,b)=>b.value-a.value).slice(0,8), {horizontal:true, yFormat:v=>fmtNum(v,0)});
+
+  const clientRev={}; p.sales.forEach(s=>{ const c=clientOf(s.clientId); const k=c?c.name:'Unknown'; clientRev[k]=(clientRev[k]||0)+Calc_saleNet(s); });
+  mountBarChart(document.getElementById('repTopClients'), Object.keys(clientRev).map(k=>({label:k,value:clientRev[k]})).sort((a,b)=>b.value-a.value).slice(0,8), {horizontal:true, yFormat:fmtMoney});
+
+  const rec = Calc_outstandingReceivables();
+  const buckets = {Current:0, 'Due Soon':0, Overdue:0};
+  rec.forEach(s=>{ const st=Calc_saleStatus(s); if(st==='Overdue') buckets.Overdue+=Calc_saleBalance(s); else if(s.dueDate && s.dueDate<=addDays(todayStr(),7)) buckets['Due Soon']+=Calc_saleBalance(s); else buckets.Current+=Calc_saleBalance(s); });
+  mountBarChart(document.getElementById('repReceivablesAging'), [{label:'Current', value:buckets.Current, color:'#199e70'},{label:'Due Soon', value:buckets['Due Soon'], color:'#c98500'},{label:'Overdue', value:buckets.Overdue, color:'#e66767'}], {horizontal:true, yFormat:fmtMoney});
+
+  const payrollByMember={}; Entities.list('payroll').filter(pr=>inRange(pr.date,range.start,range.end)).forEach(pr=>{ const m=memberOf(pr.teamMemberId); const k=m?m.name:'Unknown'; payrollByMember[k]=(payrollByMember[k]||0)+safeNum(pr.amount); });
+  mountBarChart(document.getElementById('repPayroll'), Object.keys(payrollByMember).map(k=>({label:k,value:payrollByMember[k]})).sort((a,b)=>b.value-a.value).slice(0,8), {horizontal:true, yFormat:fmtMoney});
+}
+
+/* =========================================================================
+   24. BUSINESS PERFORMANCE + SCORECARD
+   ========================================================================= */
+function perfCard(label, name, metricLabel, metricVal){
+  return '<div class="card"><div class="k-label">'+escapeHtml(label)+'</div>'+
+    '<div style="font-size:15.5px; font-weight:800; margin-top:10px;">'+escapeHtml(name||'—')+'</div>'+
+    '<div class="cell-muted" style="font-size:11.5px; margin-top:4px;">'+metricLabel+': <b style="color:var(--text);">'+metricVal+'</b></div></div>';
+}
+function businessPerformanceHtml(p, range){
+  const byOfferNet={}, byOfferProfit={}, byOfferQty={};
+  p.sales.forEach(s=>{ const o=offerOf(s.offerId); const k=o?o.name:'Unknown'; byOfferNet[k]=(byOfferNet[k]||0)+Calc_saleNet(s); byOfferProfit[k]=(byOfferProfit[k]||0)+Calc_saleProfit(s); byOfferQty[k]=(byOfferQty[k]||0)+safeNum(s.qty); });
+  const topService = Object.entries(byOfferNet).filter(([k])=>{ const o=Entities.list('offers').find(x=>x.name===k); return o&&o.type==='Service'; }).sort((a,b)=>b[1]-a[1])[0];
+  const topProduct = Object.entries(byOfferNet).filter(([k])=>{ const o=Entities.list('offers').find(x=>x.name===k); return o&&o.type==='Digital Product'; }).sort((a,b)=>b[1]-a[1])[0];
+  const mostProfitable = Object.entries(byOfferProfit).sort((a,b)=>b[1]-a[1])[0];
+  const mostSales = Object.entries(byOfferQty).sort((a,b)=>b[1]-a[1])[0];
+  const clientRev={}; p.sales.forEach(s=>{ const c=clientOf(s.clientId); const k=c?c.name:'Unknown'; clientRev[k]=(clientRev[k]||0)+Calc_saleNet(s); });
+  const topClient = Object.entries(clientRev).sort((a,b)=>b[1]-a[1])[0];
+  const expByCat={}; p.lines.forEach(l=>{ expByCat[l.categoryName]=(expByCat[l.categoryName]||0)+l.amount; });
+  const biggestExpense = Object.entries(expByCat).sort((a,b)=>b[1]-a[1])[0];
+  const campaignRoas={}; p.campaigns.forEach(c=>{ const o=offerOf(c.offerId); const k=o?o.name:c.campaignName; const roas=safeDiv(c.revenueGenerated,c.adSpend); if(!campaignRoas[k]||roas>campaignRoas[k]) campaignRoas[k]=roas; });
+  const bestRoas = Object.entries(campaignRoas).sort((a,b)=>b[1]-a[1])[0];
+
+  return '<div class="card-head" style="margin:22px 0 10px;"><h3 style="font-size:15px;">Business Performance</h3><span class="sub">'+rangeDisplay(range)+' — ranked by the metric shown, not revenue alone</span></div>'+
+    '<div class="grid" style="grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:20px;">'+
+    perfCard('Top Service', topService&&topService[0], 'Net Revenue', fmtMoney(topService?topService[1]:0))+
+    perfCard('Top Digital Product', topProduct&&topProduct[0], 'Net Revenue', fmtMoney(topProduct?topProduct[1]:0))+
+    perfCard('Most Profitable Offer', mostProfitable&&mostProfitable[0], 'Net Contribution', fmtMoney(mostProfitable?mostProfitable[1]:0))+
+    perfCard('Highest Revenue Client', topClient&&topClient[0], 'Net Revenue', fmtMoney(topClient?topClient[1]:0))+
+    perfCard('Biggest Expense Category', biggestExpense&&biggestExpense[0], 'Total Cost', fmtMoney(biggestExpense?biggestExpense[1]:0))+
+    perfCard('Best ROAS Offer', bestRoas&&bestRoas[0], 'ROAS', bestRoas?bestRoas[1].toFixed(2)+'x':'—')+
+    perfCard('Most Sales', mostSales&&mostSales[0], 'Units Sold', fmtNum(mostSales?mostSales[1]:0,0))+
+    '</div>';
+}
+function monthlyScorecardHtml(){
+  const mk = monthKey(todayStr());
+  const range = resolveRange('This Month');
+  const p = Calc_period(range);
+  const tgt = Entities.list('targets').find(t=>t.month===mk);
+  const newClients = Entities.list('clients').filter(c=>inRange(c.startDate||c.created_at&&todayStr(), range.start, range.end)).length;
+  return '<div class="card pad-lg" style="margin-bottom:22px;"><div class="card-head"><h3>Monthly Business Scorecard</h3><span class="sub">'+fmtMonthLabel(mk).toUpperCase()+'</span></div>'+
+    '<div class="grid" style="grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px;">'+
+    scoreItem('Revenue', fmtMoney(p.netRevenue))+scoreItem('Expenses', fmtMoney(p.totalExpenses))+scoreItem('Net Profit', fmtMoney(p.netProfit))+scoreItem('Net Margin', fmtPct(p.netMargin))+
+    scoreItem('Ad Spend', fmtMoney(p.adSpend))+scoreItem('ROAS', (p.roasBlended||0).toFixed(2)+'x')+scoreItem('Total Sales', fmtNum(p.sales.length,0))+scoreItem('New Clients', fmtNum(newClients,0))+
+    scoreItem('Outstanding Receivables', fmtMoney(Calc_outstandingReceivables().reduce((a,s)=>a+Calc_saleBalance(s),0)))+
+    scoreItem('Target Achievement', tgt?fmtPct(safeDiv(p.netRevenue,tgt.revenueGoal)):'No target set')+
+    '</div></div>';
+}
+function scoreItem(label,val){ return '<div class="mini-stat"><span class="lbl">'+label+'</span><span class="val num">'+val+'</span></div>'; }
+
+/* =========================================================================
+   25. ALERTS ENGINE
+   ========================================================================= */
+function computeAlerts(){
+  const alerts = [];
+  const th = Settings().thresholds;
+  const thisMonth = resolveRange('This Month');
+  const p = Calc_period(thisMonth);
+  const tgt = Entities.list('targets').find(t=>t.month===monthKey(todayStr()));
+  const dismissed = new Set(STATE.dismissedAlerts||[]);
+
+  if(tgt){
+    const pctAchieved = safeDiv(p.netRevenue, tgt.revenueGoal);
+    const dayOfMonth = new Date().getDate();
+    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+    const expectedPct = dayOfMonth/daysInMonth;
+    if(pctAchieved < expectedPct - 0.1){
+      alerts.push({key:'rev-behind-'+monthKey(todayStr()), severity:'WARNING', title:'Revenue behind target', desc:'You\'re at '+fmtPct(pctAchieved)+' of this month\'s goal with '+fmtPct(1-dayOfMonth/daysInMonth)+' of the month left.', goto:'targets'});
+    }
+    if(p.totalExpenses > tgt.maxExpenseBudget && tgt.maxExpenseBudget>0){
+      alerts.push({key:'exp-over-'+monthKey(todayStr()), severity:'URGENT', title:'Expense budget exceeded', desc:'Expenses ('+fmtMoney(p.totalExpenses)+') have passed your budget of '+fmtMoney(tgt.maxExpenseBudget)+'.', goto:'expenses'});
+    }
+    if(tgt.maxAdBudget>0 && p.adSpend >= tgt.maxAdBudget*0.9){
+      alerts.push({key:'ad-budget-'+monthKey(todayStr()), severity: p.adSpend>=tgt.maxAdBudget?'URGENT':'WARNING', title:'Advertising budget almost reached', desc:'Ad spend is at '+fmtMoney(p.adSpend)+' of your '+fmtMoney(tgt.maxAdBudget)+' budget.', goto:'advertising'});
+    }
+    if(p.roasBlended>0 && p.roasBlended < tgt.targetRoas*0.7){
+      alerts.push({key:'roas-low-blended', severity:'WARNING', title:'Blended ROAS below target', desc:'This month\'s blended ROAS is '+p.roasBlended.toFixed(2)+'x, below your '+tgt.targetRoas+'x target.', goto:'advertising'});
+    }
+  }
+  Entities.list('campaigns').filter(c=>inRange(c.date, thisMonth.start, thisMonth.end)).forEach(c=>{
+    const cpm = safeDiv(c.adSpend, c.messages);
+    const roas = safeDiv(c.revenueGenerated, c.adSpend);
+    if(c.messages>0 && cpm > th.highCPM) alerts.push({key:'cpm-'+c.id, severity:'WARNING', title:'High cost per message', desc:'"'+c.campaignName+'" is at '+fmtMoney(cpm)+' per message (threshold '+fmtMoney(th.highCPM)+').', goto:'advertising'});
+    if(c.adSpend>0 && c.purchases===0 && c.messages>15) alerts.push({key:'nopurchase-'+c.id, severity:'URGENT', title:'No purchases from ad spend', desc:'"'+c.campaignName+'" spent '+fmtMoney(c.adSpend)+' with zero purchases so far.', goto:'advertising'});
+    else if(c.adSpend>0 && roas>0 && roas < th.lowROAS) alerts.push({key:'roas-'+c.id, severity:'WARNING', title:'Low ROAS campaign', desc:'"'+c.campaignName+'" is returning '+roas.toFixed(2)+'x (below '+th.lowROAS+'x).', goto:'advertising'});
+    else if(c.adSpend>0 && roas>=th.goodROAS) alerts.push({key:'good-'+c.id, severity:'GOOD', title:'Good ad performance', desc:'"'+c.campaignName+'" is returning '+roas.toFixed(2)+'x ROAS.', goto:'advertising'});
+    if(c.adSpend > th.highAdSpendDaily) alerts.push({key:'highspend-'+c.id, severity:'INFO', title:'High ad spend entry', desc:'"'+c.campaignName+'" logged '+fmtMoney(c.adSpend)+' in a single entry.', goto:'advertising'});
+  });
+  Calc_outstandingReceivables().forEach(s=>{
+    if(Calc_saleStatus(s)==='Overdue'){
+      const c = clientOf(s.clientId);
+      alerts.push({key:'overdue-'+s.id, severity:'URGENT', title:'Overdue client payment', desc:(c?c.name:'A client')+' has an overdue balance of '+fmtMoney(Calc_saleBalance(s))+'.', goto:'receivables'});
+    }
+  });
+  Entities.list('teamMembers').forEach(m=>{
+    if(m.nextPayment && m.nextPayment>=todayStr() && m.nextPayment<=addDays(todayStr(),3)){
+      alerts.push({key:'payroll-'+m.id, severity:'INFO', title:'Upcoming payroll', desc:m.name+' is due for payment on '+fmtDate(m.nextPayment)+'.', goto:'team'});
+    }
+  });
+  Entities.list('expenses').filter(e=>e.recurring).forEach(e=>{
+    const nextDue = e.frequency==='Monthly' ? addDays(e.date,30) : e.frequency==='Weekly' ? addDays(e.date,7) : e.frequency==='Yearly' ? addDays(e.date,365) : addDays(e.date,90);
+    if(nextDue>=todayStr() && nextDue<=addDays(todayStr(),5)){
+      alerts.push({key:'subdue-'+e.id, severity:'INFO', title:'Subscription payment due', desc:e.name+' ('+fmtMoney(e.amount)+') is due around '+fmtDate(nextDue)+'.', goto:'expenses'});
+    }
+  });
+  if(p.netProfit<0) alerts.push({key:'negative-profit-'+monthKey(todayStr()), severity:'URGENT', title:'Negative profit this month', desc:'This month is currently running at a net loss of '+fmtMoney(Math.abs(p.netProfit))+'.', goto:'reports'});
+  Entities.list('offers').forEach(o=>{
+    const price = o.promoPrice||o.regularPrice;
+    const margin = safeDiv(price-safeNum(o.fulfillmentCost)-safeNum(o.adAllocation), price);
+    if(price>0 && margin<0.15) alerts.push({key:'lowmargin-'+o.id, severity:'INFO', title:'Low-margin offer', desc:'"'+o.name+'" has an estimated margin of only '+fmtPct(margin)+'.', goto:'services'});
+  });
+  const avgExpense = safeDiv(p.lines.reduce((a,l)=>a+l.amount,0), p.lines.length||1);
+  p.lines.forEach(l=>{ if(avgExpense>0 && l.amount > avgExpense*4 && l.amount>3000) alerts.push({key:'unusual-'+l.id, severity:'INFO', title:'Unusually high expense', desc:'"'+l.name+'" ('+fmtMoney(l.amount)+') is well above your average expense this period.', goto:'expenses'}); });
+
+  return alerts.filter(a=>!dismissed.has(a.key)).sort((a,b)=>{ const order={URGENT:0,WARNING:1,INFO:2,GOOD:3}; return order[a.severity]-order[b.severity]; });
+}
+function alertRowHtml(a){
+  return '<div class="alert-row" data-key="'+a.key+'"><div class="alert-icon '+a.severity+'">'+icon(a.severity==='GOOD'?'check':a.severity==='URGENT'?'x':a.severity==='WARNING'?'alerts':'info','icon-sm')+'</div>'+
+    '<div style="flex:1;"><div class="alert-title">'+escapeHtml(a.title)+'</div><div class="alert-desc">'+escapeHtml(a.desc)+'</div></div>'+
+    '<span class="badge badge-'+(a.severity==='URGENT'?'danger':a.severity==='WARNING'?'warning':a.severity==='GOOD'?'success':'info')+'" style="align-self:flex-start;">'+a.severity+'</span>'+
+    '<button class="btn btn-icon btn-ghost alert-dismiss" data-dismiss="'+a.key+'" title="Dismiss">'+icon('close','icon-sm')+'</button></div>';
+}
+function renderAlertsPage(container){
+  const alerts = computeAlerts();
+  let html = '<div class="page-head"><div><h2>Alert Center</h2><p class="sub">Everything that needs your attention, ranked by severity.</p></div>'+
+    (alerts.length?'<button class="btn" id="dismissAllBtn">Dismiss All</button>':'')+'</div>';
+  if(!alerts.length){
+    html += '<div class="card"><div class="empty-state">'+icon('check','icon-lg')+'<h4>All clear.</h4><p>No alerts right now — revenue, budgets and ROAS all look on track.</p></div></div>';
+  } else {
+    html += '<div>'+alerts.map(alertRowHtml).join('')+'</div>';
+  }
+  container.innerHTML = html;
+  container.querySelectorAll('.alert-row').forEach(el=>{
+    el.addEventListener('click', e=>{ if(e.target.closest('[data-dismiss]')) return; const a=alerts.find(x=>x.key===el.getAttribute('data-key')); if(a&&a.goto) goTo(a.goto); });
+  });
+  container.querySelectorAll('[data-dismiss]').forEach(btn=> btn.onclick = e=>{ e.stopPropagation(); const key=btn.getAttribute('data-dismiss'); STATE.dismissedAlerts = (STATE.dismissedAlerts||[]).concat(key); DB_save(); render(); });
+  const dismissAllBtn = document.getElementById('dismissAllBtn');
+  if(dismissAllBtn) dismissAllBtn.onclick = ()=>{ STATE.dismissedAlerts = (STATE.dismissedAlerts||[]).concat(alerts.map(a=>a.key)); DB_save(); render(); };
+}
+
+/* =========================================================================
+   26. SETTINGS PAGE
+   ========================================================================= */
+function renderSettingsPage(container){
+  const s = Settings();
+  const trashCount = Object.keys(STATE).filter(k=>Array.isArray(STATE[k])).reduce((a,k)=>a+STATE[k].filter(r=>r.deleted).length,0);
+  const demoCount = Object.keys(STATE).filter(k=>Array.isArray(STATE[k])).reduce((a,k)=>a+STATE[k].filter(r=>r.is_demo && !r.deleted).length,0);
+
+  container.innerHTML = '<div class="page-head"><div><h2>Settings</h2><p class="sub">Business defaults, categories, thresholds and data management.</p></div></div>'+
+
+  '<div class="settings-section"><h3>Business</h3><div class="sub">Shown across the dashboard and reports.</div>'+
+    '<div class="card"><div class="form-grid">'+
+    field_({key:'businessName',label:'Business Name',type:'text',default:s.businessName})+
+    field_({key:'ownerName',label:'Owner Name',type:'text',default:s.ownerName})+
+    field_({key:'currencySymbol',label:'Currency Symbol',type:'text',default:s.currencySymbol})+
+    field_({key:'currencyCode',label:'Currency Code',type:'text',default:s.currencyCode})+
+    field_({key:'timezone',label:'Timezone',type:'text',default:s.timezone, readonly:true})+
+    '</div><button class="btn btn-primary" id="saveBizBtn" style="margin-top:6px;">'+icon('check')+' Save</button></div></div>'+
+
+  '<div class="settings-section"><h3>Ad Performance Thresholds</h3><div class="sub">Used to trigger advertising alerts. Tune these to what "good" and "bad" mean for your own campaigns.</div>'+
+    '<div class="card"><div class="form-grid">'+
+    field_({key:'thresholds.highCPM',label:'High Cost / Message above',type:'number',default:s.thresholds.highCPM})+
+    field_({key:'thresholds.lowROAS',label:'Low ROAS below',type:'number',default:s.thresholds.lowROAS})+
+    field_({key:'thresholds.goodROAS',label:'Good ROAS at/above',type:'number',default:s.thresholds.goodROAS})+
+    field_({key:'thresholds.highAdSpendDaily',label:'High Ad Spend (single entry) above',type:'number',default:s.thresholds.highAdSpendDaily})+
+    '</div><button class="btn btn-primary" id="saveThreshBtn" style="margin-top:6px;">'+icon('check')+' Save</button></div></div>'+
+
+  '<div class="settings-section"><h3>Tax Settings</h3><div class="sub">Reference figures only — confirm exact treatment with your accountant.</div>'+
+    '<div class="card"><div class="form-grid">'+
+    field_({key:'tax.withholdingPct',label:'Client Withholding Tax %',type:'number',default:s.tax.withholdingPct, hint:'For corporate clients who withhold tax (e.g. BIR Form 2307).'})+
+    field_({key:'tax.vatOnAdsPct',label:'VAT on Ad Spend %',type:'number',default:s.tax.vatOnAdsPct, hint:'Meta/Google ad invoices in PH may include VAT on top of ad spend.'})+
+    '</div><button class="btn btn-primary" id="saveTaxBtn" style="margin-top:6px;">'+icon('check')+' Save</button></div></div>'+
+
+  '<div class="settings-section"><h3>Payment Methods</h3><div class="sub">Available options on Sales forms.</div>'+
+    '<div class="card">'+chipList(s.paymentMethods,'pm')+addChipRow('pm','Add payment method')+'</div></div>'+
+
+  '<div class="settings-section"><h3>Expense Categories</h3><div class="sub">Meta/Google/TikTok Ads categories flow in automatically from Advertising and cannot be used for manual entries.</div>'+
+    '<div class="card"><div class="table-wrap"><table class="tbl"><thead><tr><th>Category</th><th>Cost Type</th><th>Behavior</th><th></th></tr></thead><tbody>'+
+    Entities.list('expenseCategories').map(c=>'<tr><td>'+escapeHtml(c.name)+(c.autoOnly?' <span class="badge badge-info">auto</span>':'')+'</td><td class="category-cost-type">'+c.costType+'</td><td class="category-cost-type">'+c.behavior+'</td>'+
+      '<td><div class="row-actions">'+(c.builtIn?'':'<button class="btn btn-icon btn-ghost" data-delcat="'+c.id+'">'+icon('trash')+'</button>')+'</div></td></tr>').join('')+
+    '</tbody></table></div><button class="btn" id="addCatBtn" style="margin-top:12px;">'+icon('plus')+' Add Category</button></div></div>'+
+
+  '<div class="settings-section"><h3>Data Management</h3><div class="sub">Your data is stored locally in this browser only.</div>'+
+    '<div class="card"><div style="display:flex; flex-wrap:wrap; gap:10px;">'+
+    '<button class="btn btn-primary" id="backupBtn">'+icon('download')+' Backup Data (JSON)</button>'+
+    '<button class="btn" id="restoreBtn">'+icon('upload')+' Restore from Backup</button>'+
+    '<input type="file" id="restoreFile" accept="application/json" style="display:none;">'+
+    (trashCount?'<button class="btn" id="viewTrashBtn">'+icon('trash')+' View Trash ('+trashCount+')</button>':'')+
+    (demoCount?'<button class="btn btn-danger" id="removeDemoBtn">'+icon('x')+' Remove All Demo Data ('+demoCount+')</button>':'')+
+    '<button class="btn btn-danger" id="resetAllBtn">'+icon('trash')+' Delete All Data</button>'+
+    '</div><p class="field-hint" style="margin-top:12px;">Back up regularly — clearing your browser data or storage will erase everything stored here.</p></div></div>'+
+
+  '<div class="settings-section"><h3>CSV Import</h3><div class="sub">Import Sales, Expenses, Clients or Advertising from a CSV file (with a preview before confirming).</div>'+
+    '<div class="card"><div class="pill-tabs" style="margin-bottom:14px;">'+
+    ['sales','expenses','clients','campaigns'].map(t=>'<span class="pill" data-importtype="'+t+'">'+t[0].toUpperCase()+t.slice(1)+'</span>').join('')+
+    '</div><input type="file" id="importFile" accept=".csv" style="display:none;"><div id="importHint" class="field-hint">Choose a data type above, then a CSV file to preview.</div></div></div>'
+  ;
+
+  document.getElementById('saveBizBtn').onclick = ()=>{ s.businessName=getVal('businessName',s.businessName); s.ownerName=getVal('ownerName',s.ownerName); s.currencySymbol=getVal('currencySymbol',s.currencySymbol); s.currencyCode=getVal('currencyCode',s.currencyCode); DB_save(); render(); toast('Business info saved.'); };
+  document.getElementById('saveThreshBtn').onclick = ()=>{ s.thresholds.highCPM=+getVal('thresholds.highCPM',s.thresholds.highCPM); s.thresholds.lowROAS=+getVal('thresholds.lowROAS',s.thresholds.lowROAS); s.thresholds.goodROAS=+getVal('thresholds.goodROAS',s.thresholds.goodROAS); s.thresholds.highAdSpendDaily=+getVal('thresholds.highAdSpendDaily',s.thresholds.highAdSpendDaily); DB_save(); render(); toast('Thresholds saved.'); };
+  document.getElementById('saveTaxBtn').onclick = ()=>{ s.tax.withholdingPct=+getVal('tax.withholdingPct',s.tax.withholdingPct); s.tax.vatOnAdsPct=+getVal('tax.vatOnAdsPct',s.tax.vatOnAdsPct); DB_save(); render(); toast('Tax settings saved.'); };
+
+  wireChipList(container, s.paymentMethods, 'pm', ()=>DB_save());
+  document.getElementById('addCatBtn').onclick = ()=> openEntityForm({ title:'Expense Category', fields:[
+    {key:'name',label:'Category Name',type:'text',required:true},
+    {key:'costType',label:'Cost Type',type:'select',options:['opex','direct','advertising','payroll','other'],default:'opex'},
+    {key:'behavior',label:'Behavior',type:'select',options:['fixed','variable'],default:'variable'},
+  ], onSave:v=>Entities.create('expenseCategories', Object.assign({},v,{autoOnly:false,builtIn:false})) });
+  container.querySelectorAll('[data-delcat]').forEach(b=> b.onclick=async ()=>{ const ok=await confirmDialog({title:'Delete category?', danger:true, message:'Expenses already using this category keep their record but will show as Uncategorized.'}); if(ok){ Entities.softDelete('expenseCategories', b.getAttribute('data-delcat')); render(); } });
+
+  document.getElementById('backupBtn').onclick = exportJsonBackup;
+  document.getElementById('restoreBtn').onclick = ()=> document.getElementById('restoreFile').click();
+  document.getElementById('restoreFile').addEventListener('change', handleRestoreFile);
+  if(document.getElementById('viewTrashBtn')) document.getElementById('viewTrashBtn').onclick = openTrashModal;
+  if(document.getElementById('removeDemoBtn')) document.getElementById('removeDemoBtn').onclick = async ()=>{
+    const ok = await confirmDialog({title:'Remove all demo data?', message:'This deletes every record flagged as demo data ('+demoCount+' records) so you can start with a clean tracker. This cannot be undone.', danger:true, okText:'Remove Demo Data'});
+    if(ok){ Object.keys(STATE).forEach(k=>{ if(Array.isArray(STATE[k])) STATE[k]=STATE[k].filter(r=>!r.is_demo); }); DB_save(); render(); toast('Demo data removed.'); }
+  };
+  document.getElementById('resetAllBtn').onclick = async ()=>{
+    const ok = await confirmDialog({title:'Delete ALL data?', message:'This permanently erases every sale, client, expense and setting in this tracker. This cannot be undone. Consider a backup first.', danger:true, okText:'Delete Everything'});
+    if(ok){ STATE = freshState(); DB_save(); render(); toast('All data cleared.'); }
+  };
+  container.querySelectorAll('[data-importtype]').forEach(pill=> pill.onclick=()=>{
+    container.querySelectorAll('[data-importtype]').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+    IMPORT_TYPE = pill.getAttribute('data-importtype');
+    document.getElementById('importHint').textContent = 'Selected: '+IMPORT_TYPE+'. Choose a CSV file to preview.';
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', handleImportFile);
+}
+function field_(f){
+  const val = f.default!=null?f.default:'';
+  return '<div class="field"><label class="field-label">'+escapeHtml(f.label)+'</label><input class="input" type="'+(f.type==='number'?'number':'text')+'" id="stf_'+f.key+'" value="'+escapeHtml(val)+'" '+(f.readonly?'readonly':'')+'>'+(f.hint?'<div class="field-hint">'+escapeHtml(f.hint)+'</div>':'')+'</div>';
+}
+function getVal(key, fallback){ const el=document.getElementById('stf_'+key); return el?el.value:fallback; }
+function chipList(arr,ns){ return '<div id="chipList_'+ns+'">'+arr.map((v,i)=>'<span class="tag-chip">'+escapeHtml(v)+'<button data-chipdel="'+ns+':'+i+'">'+icon('close','icon-sm')+'</button></span>').join('')+'</div>'; }
+function addChipRow(ns,ph){ return '<div style="display:flex; gap:8px; margin-top:10px;"><input class="input" id="chipInput_'+ns+'" placeholder="'+ph+'" style="max-width:240px;"><button class="btn" id="chipAdd_'+ns+'">'+icon('plus')+' Add</button></div>'; }
+function wireChipList(container, arr, ns, onChange){
+  container.querySelectorAll('[data-chipdel^="'+ns+':"]').forEach(btn=>{
+    btn.onclick = ()=>{ const idx = +btn.getAttribute('data-chipdel').split(':')[1]; arr.splice(idx,1); onChange(); render(); };
+  });
+  const addBtn = document.getElementById('chipAdd_'+ns);
+  if(addBtn) addBtn.onclick = ()=>{ const inp=document.getElementById('chipInput_'+ns); if(inp.value.trim()){ arr.push(inp.value.trim()); onChange(); render(); } };
+}
+
+/* Trash / restore records --------------------------------------------------*/
+function openTrashModal(){
+  const items = [];
+  Object.keys(STATE).forEach(col=>{ if(Array.isArray(STATE[col])) STATE[col].forEach(r=>{ if(r.deleted) items.push({col, r}); }); });
+  const html = '<div class="modal-panel wide"><div class="modal-head"><h3>Trash</h3><button class="btn btn-icon btn-ghost" id="trashClose">'+icon('close')+'</button></div>'+
+    '<div class="modal-body">'+(items.length?'<div class="table-wrap"><table class="tbl"><thead><tr><th>Type</th><th>Record</th><th></th></tr></thead><tbody>'+
+      items.map((it,i)=>'<tr><td>'+it.col+'</td><td>'+escapeHtml(it.r.name||it.r.campaignName||it.r.date||it.r.id)+'</td><td><button class="btn btn-sm btn-primary" data-restore="'+i+'">Restore</button></td></tr>').join('')+
+      '</tbody></table></div>' : '<div class="empty-state">'+icon('trash','icon-lg')+'<h4>Trash is empty.</h4></div>')+
+    '</div><div class="modal-foot"><button class="btn" id="trashClose2">Close</button></div></div>';
+  openModalRaw(html);
+  document.getElementById('trashClose').onclick = closeModal;
+  document.getElementById('trashClose2').onclick = closeModal;
+  document.querySelectorAll('[data-restore]').forEach(btn=> btn.onclick=()=>{ const idx=+btn.getAttribute('data-restore'); items[idx].r.deleted=false; DB_save(); closeModal(); render(); toast('Record restored.'); });
+}
+
+/* CSV import ----------------------------------------------------------------*/
+let IMPORT_TYPE = 'sales';
+function parseCsv(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.length);
+  const rows = lines.map(l=>{ const out=[]; let cur='', q=false; for(let i=0;i<l.length;i++){ const c=l[i]; if(q){ if(c==='"'){ if(l[i+1]==='"'){cur+='"';i++;} else q=false; } else cur+=c; } else { if(c==='"') q=true; else if(c===','){ out.push(cur); cur=''; } else cur+=c; } } out.push(cur); return out; });
+  const headers = rows.shift()||[];
+  return rows.map(r=>{ const o={}; headers.forEach((h,i)=>o[h.trim()]=r[i]); return o; });
+}
+function handleImportFile(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let parsed;
+    try{ parsed = parseCsv(reader.result); }catch(err){ toast('Could not read that CSV file.','error'); return; }
+    openImportPreview(IMPORT_TYPE, parsed);
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function openImportPreview(type, rows){
+  const preview = rows.slice(0,8);
+  const cols = preview.length?Object.keys(preview[0]):[];
+  const html = '<div class="modal-panel wide"><div class="modal-head"><h3>Import Preview — '+type+'</h3><button class="btn btn-icon btn-ghost" id="ipClose">'+icon('close')+'</button></div>'+
+    '<div class="modal-body"><p class="sub" style="margin-bottom:12px;">'+rows.length+' row(s) found. Showing the first '+preview.length+'. Confirm to import as new records.</p>'+
+    '<div class="table-wrap"><table class="tbl"><thead><tr>'+cols.map(c=>'<th>'+escapeHtml(c)+'</th>').join('')+'</tr></thead><tbody>'+
+    preview.map(r=>'<tr>'+cols.map(c=>'<td>'+escapeHtml(r[c]||'')+'</td></tr>').join('')+'</tr>').join('')+
+    '</tbody></table></div></div><div class="modal-foot"><button class="btn" id="ipCancel">Cancel</button><button class="btn btn-primary" id="ipConfirm">'+icon('check')+' Import '+rows.length+' Rows</button></div></div>';
+  openModalRaw(html);
+  document.getElementById('ipClose').onclick = closeModal;
+  document.getElementById('ipCancel').onclick = closeModal;
+  document.getElementById('ipConfirm').onclick = ()=>{
+    let count=0;
+    rows.forEach(r=>{
+      try{
+        if(type==='sales') Entities.create('sales', {date:r.Date||r.date||todayStr(), clientId:findByName('clients',r.Client||r.client)||'', offerId:findByName('offers',r.Offer||r.offer)||'', type:r.Type||r.type||'Service', qty:+(r.Qty||r.qty||1), price:+(r.Price||r.price||0), discount:+(r.Discount||0), directCost:+(r.DirectCost||0), paymentFee:+(r.PaymentFee||0), amountPaid:+(r.AmountPaid||r.Price||0), refund:0, account:(Entities.list('cashAccounts')[0]||{}).id||'', paymentMethod:r.PaymentMethod||'Cash', paymentStatus:r.PaymentStatus||'Paid'});
+        else if(type==='expenses') Entities.create('expenses', {date:r.Date||r.date||todayStr(), name:r.Name||r.name||'Imported expense', categoryId:findByName('expenseCategories',r.Category)||(Entities.list('expenseCategories')[0]||{}).id, vendor:r.Vendor||'', amount:+(r.Amount||r.amount||0), account:(Entities.list('cashAccounts')[0]||{}).id||'', tag:'Business'});
+        else if(type==='clients') Entities.create('clients', {name:r.Name||r.name||'Imported Client', company:r.Company||'', phone:r.Phone||'', email:r.Email||'', projectStatus:r.Status||'New Lead', startDate:todayStr()});
+        else if(type==='campaigns') Entities.create('campaigns', {date:r.Date||r.date||todayStr(), platform:r.Platform||'Meta Ads', campaignName:r.Campaign||r.campaignName||'Imported Campaign', adSpend:+(r.AdSpend||r.Spend||0), messages:+(r.Messages||0), purchases:+(r.Purchases||0), revenueGenerated:+(r.Revenue||0), account:(Entities.list('cashAccounts')[0]||{}).id||''});
+        count++;
+      }catch(err){ /* skip malformed row */ }
+    });
+    closeModal(); render(); toast('Imported '+count+' of '+rows.length+' rows.');
+  };
+}
+function findByName(col,name){ if(!name) return null; const r=Entities.list(col).find(x=>(x.name||'').toLowerCase()===String(name).toLowerCase()); return r?r.id:null; }
+function handleRestoreFile(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    let data;
+    try{ data = JSON.parse(reader.result); }catch(err){ toast('That file isn\'t a valid backup.','error'); return; }
+    if(!data || !data.settings){ toast('That file isn\'t a valid Ad Business Tracker backup.','error'); return; }
+    const ok = await confirmDialog({title:'Restore backup?', message:'This will replace all current data in this browser with the contents of the backup file. This cannot be undone.', danger:true, okText:'Restore'});
+    if(ok){ STATE = data; DB_save(); render(); toast('Backup restored.'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+/* =========================================================================
+   27. QUICK ADD
+   ========================================================================= */
+const QUICK_ADD_ITEMS = [
+  {label:'Add Sale', icon:'sales', open:()=> openEntityForm({title:'Sale', fields:saleFields(), wide:true, defaults:()=>({date:todayStr(), qty:1, discount:0, refund:0, amountPaid:0, paymentStatus:'Pending'}), onSave:v=>Entities.create('sales', v)})},
+  {label:'Add Expense', icon:'expenses', open:()=> openEntityForm({title:'Expense', fields:expenseFields(), defaults:()=>({date:todayStr(), tag:'Business'}), onSave:v=>Entities.create('expenses', v)})},
+  {label:'Add Client', icon:'clients', open:()=> openEntityForm({title:'Client', fields:clientFields(), defaults:()=>({projectStatus:'New Lead', startDate:todayStr()}), onSave:v=>Entities.create('clients', v)})},
+  {label:'Add Payment', icon:'receivables', open:()=>{ const rec=Calc_outstandingReceivables()[0]; if(rec) openRecordPaymentModal(rec.id); else toast('No outstanding balances to record a payment against.'); }},
+  {label:'Add Ad Performance', icon:'advertising', open:()=> openEntityForm({title:'Ad Entry', fields:campaignFields(), defaults:()=>({date:todayStr(), platform:'Meta Ads', messages:0, purchases:0, revenueGenerated:0}), onSave:v=>Entities.create('campaigns', v)})},
+  {label:'Add Team Payment', icon:'team', open:()=> openEntityForm({title:'Payroll Payment', fields:payrollFields(), defaults:()=>({date:todayStr(), type:'Salary'}), onSave:v=>Entities.create('payroll', v)})},
+  {label:'Add Product / Service', icon:'services', open:()=> openEntityForm({title:'Offer', fields:offerFields(), defaults:()=>({type:'Service', status:'Active', paymentFeePct:0}), onSave:v=>Entities.create('offers', v)})},
+];
+function initQuickAdd(){
+  document.getElementById('quick-add-fab').innerHTML = icon('plus');
+  document.getElementById('quick-add-fab').title = 'Quick Add';
+  const menu = document.getElementById('quick-add-menu');
+  menu.innerHTML = QUICK_ADD_ITEMS.map((it,i)=>'<div class="qa-item" data-qa="'+i+'">'+icon(it.icon)+' '+it.label+'</div>').join('');
+  document.getElementById('quick-add-fab').onclick = e=>{ e.stopPropagation(); menu.classList.toggle('open'); };
+  menu.querySelectorAll('[data-qa]').forEach(el=> el.onclick = ()=>{ menu.classList.remove('open'); QUICK_ADD_ITEMS[+el.getAttribute('data-qa')].open(); });
+  document.addEventListener('click', e=>{ if(!menu.contains(e.target) && e.target.id!=='quick-add-fab') menu.classList.remove('open'); });
+}
+
+/* =========================================================================
+   28. GLOBAL SEARCH
+   ========================================================================= */
+function buildSearchIndex(){
+  const idx = [];
+  Entities.list('clients').forEach(c=> idx.push({group:'Clients', label:c.name, meta:c.company||c.email||'', icon:'clients', goto:'clients'}));
+  Entities.list('sales').forEach(s=> idx.push({group:'Transactions', label:(clientOf(s.clientId)||{}).name+' — '+(offerOf(s.offerId)||{}).name, meta:fmtDateShort(s.date)+' · '+fmtMoney(Calc_saleNet(s)), icon:'sales', goto:'sales'}));
+  Entities.list('offers').forEach(o=> idx.push({group:'Products', label:o.name, meta:o.category, icon:'services', goto:'services'}));
+  Entities.list('expenses').forEach(e=> idx.push({group:'Expenses', label:e.name, meta:fmtDateShort(e.date)+' · '+fmtMoney(e.amount), icon:'expenses', goto:'expenses'}));
+  Entities.list('campaigns').forEach(c=> idx.push({group:'Campaigns', label:c.campaignName, meta:c.platform, icon:'advertising', goto:'advertising'}));
+  Entities.list('teamMembers').forEach(m=> idx.push({group:'Team Members', label:m.name, meta:m.role, icon:'team', goto:'team'}));
+  return idx;
+}
+function openSearch(){
+  const overlay = document.getElementById('search-overlay');
+  const panel = document.getElementById('searchPanel');
+  panel.innerHTML = '<div class="search-panel-input">'+icon('search')+'<input type="text" id="searchInput" placeholder="Search clients, sales, products, expenses, campaigns, team…" autofocus></div><div class="search-results" id="searchResults"></div>';
+  overlay.classList.add('open');
+  const input = document.getElementById('searchInput');
+  input.focus();
+  const runSearch = ()=>{
+    const q = input.value.trim().toLowerCase();
+    const idx = buildSearchIndex();
+    const results = q ? idx.filter(r=> r.label.toLowerCase().includes(q) || (r.meta||'').toLowerCase().includes(q)).slice(0,40) : idx.slice(0,20);
+    const groups = {};
+    results.forEach(r=>{ groups[r.group]=groups[r.group]||[]; groups[r.group].push(r); });
+    const resEl = document.getElementById('searchResults');
+    resEl.innerHTML = Object.keys(groups).length ? Object.keys(groups).map(g=>
+      '<div class="search-group-label">'+g+'</div>'+groups[g].map(r=>'<div class="search-result" data-goto="'+r.goto+'">'+icon(r.icon)+'<div><div style="font-weight:700; font-size:13px;">'+escapeHtml(r.label)+'</div><div class="search-result-meta">'+escapeHtml(r.meta)+'</div></div></div>').join('')
+    ).join('') : '<div class="empty-state" style="padding:30px;">'+icon('search','icon-lg')+'<h4>No matches.</h4><p>Try a different name or keyword.</p></div>';
+    resEl.querySelectorAll('.search-result').forEach(el=> el.onclick=()=>{ closeSearch(); goTo(el.getAttribute('data-goto')); });
+  };
+  input.addEventListener('input', debounce(runSearch,120));
+  runSearch();
+}
+function closeSearch(){ document.getElementById('search-overlay').classList.remove('open'); }
+document.getElementById('searchOverlay').addEventListener('click', closeSearch);
+
+/* =========================================================================
+   29. INIT
+   ========================================================================= */
+function initShell(){
+  document.getElementById('sidebarCollapseBtn').onclick = ()=>{ APP.sidebarCollapsed=!APP.sidebarCollapsed; renderSidebar(); };
+  document.getElementById('hamburgerBtn').innerHTML = icon('menu');
+  document.getElementById('hamburgerBtn').onclick = ()=>{ APP.mobileOpen=!APP.mobileOpen; renderSidebar(); };
+  document.getElementById('globalSearchBtn').onclick = openSearch;
+  document.addEventListener('keydown', e=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openSearch(); }
+    if(e.key==='Escape'){ closeSearch(); closeModal(); document.getElementById('quick-add-menu').classList.remove('open'); }
+  });
+}
+function boot(){
+  DB_load();
+  APP.range = resolveRange('This Month');
+  initShell();
+  initQuickAdd();
+  render();
+}
+
+/* ---- Auth gate: change APP_PASSWORD to set your own password ---- */
+const APP_PASSWORD = 'adgenius2026';
+const AUTH_KEY = 'abt_authed_v1';
+
+function unlockApp(){
+  document.getElementById('loginGate').classList.add('hidden');
+  document.getElementById('app-shell').classList.add('unlocked');
+  boot();
+}
+
+if(localStorage.getItem(AUTH_KEY) === '1'){
+  unlockApp();
+}else{
+  const form = document.getElementById('loginForm');
+  const pwInput = document.getElementById('loginPassword');
+  const errEl = document.getElementById('loginError');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(pwInput.value === APP_PASSWORD){
+      try{ localStorage.setItem(AUTH_KEY, '1'); }catch(e){}
+      unlockApp();
+    }else{
+      errEl.textContent = 'Incorrect password. Try again.';
+      pwInput.value = '';
+      pwInput.focus();
+    }
+  });
+}
+
+function render(){
+  renderSidebar();
+  renderTopbar();
+  const content = document.getElementById('content');
+  const fn = PAGE_RENDERERS[APP.route] || renderDashboardPage;
+  try{
+    fn(content);
+  }catch(err){
+    console.error(err);
+    content.innerHTML = '<div class="card"><div class="empty-state">'+icon('alerts','icon-lg')+'<h4>Something needs your attention</h4><p>This section hit an unexpected error. Your data is safe. Try another section or reload.</p></div></div>';
+  }
+}
+</script>
+
+
